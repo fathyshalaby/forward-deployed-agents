@@ -1,0 +1,50 @@
+[
+  {
+    "id": "identity",
+    "name": "Identity provider",
+    "scopes": ["read", "write", "identify"],
+    "actions": ["identity.get_user", "identity.list_groups", "identity.reset_mfa"],
+    "approval_required": ["identity.reset_mfa"],
+    "description": "Group membership and account state. No secret material is exposed."
+  },
+  {
+    "id": "tickets",
+    "name": "Ticketing system",
+    "scopes": ["read", "write"],
+    "actions": ["tickets.search", "tickets.create", "tickets.comment", "tickets.resolve"],
+    "approval_required": ["tickets.create", "tickets.comment", "tickets.resolve"],
+    "description": "Ticket metadata only; comments are write actions that need approval."
+  },
+  {
+    "id": "chat",
+    "name": "Team chat",
+    "scopes": ["read", "write", "content"],
+    "actions": ["chat.search", "chat.post_update"],
+    "approval_required": ["chat.post_update"],
+    "description": "Example of a connector with a content scope. Content use always needs purpose and approval."
+  },
+  {
+    "id": "repo",
+    "name": "Source repository",
+    "scopes": ["read", "write"],
+    "actions": ["repo.open_issue", "repo.create_pull_request"],
+    "approval_required": ["repo.open_issue", "repo.create_pull_request"],
+    "description": "Issue and pull-request metadata."
+  },
+  {
+    "id": "observability",
+    "name": "Observability",
+    "scopes": ["read"],
+    "actions": ["observability.get_metrics", "observability.get_incident_summary"],
+    "approval_required": [],
+    "description": "Aggregate signals only, no logs or payloads."
+  },
+  {
+    "id": "directory",
+    "name": "Org directory",
+    "scopes": ["read"],
+    "actions": ["directory.find_team", "directory.get_owner"],
+    "approval_required": [],
+    "description": "Team and role metadata, not personal contact details."
+  }
+]

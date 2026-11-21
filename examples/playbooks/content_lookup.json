@@ -1,0 +1,20 @@
+{
+  "id": "content_lookup",
+  "name": "Content lookup (policy example)",
+  "description": "Example of a playbook that needs content. It is denied unless a human grants a purpose-bound, single-use approval. Keep such playbooks out of the default set for real customers.",
+  "purpose": "support investigation",
+  "tags": ["example", "policy"],
+  "steps": [
+    {
+      "id": "search",
+      "title": "Search chat context for the incident",
+      "tool": "connectors.call",
+      "connector": "chat",
+      "action": "chat.search",
+      "scopes": ["read", "content"],
+      "needs": ["content"],
+      "purpose": "support investigation",
+      "approval": true
+    }
+  ]
+}

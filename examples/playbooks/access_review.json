@@ -1,0 +1,32 @@
+{
+  "id": "access_review",
+  "name": "Access review",
+  "description": "Example playbook: collect group counts and the accountable role, then hand exceptions to a human. Read-only by default.",
+  "purpose": "access review",
+  "tags": ["example", "security"],
+  "steps": [
+    {
+      "id": "groups",
+      "title": "Count granted groups",
+      "tool": "connectors.call",
+      "connector": "identity",
+      "action": "identity.list_groups",
+      "scopes": ["read"],
+      "needs": ["aggregate"]
+    },
+    {
+      "id": "owner",
+      "title": "Find the accountable role",
+      "tool": "connectors.call",
+      "connector": "directory",
+      "action": "directory.get_owner",
+      "scopes": ["read"],
+      "needs": ["metadata"]
+    },
+    {
+      "id": "handoff",
+      "title": "Escalate exceptions to the human reviewer",
+      "tool": "note"
+    }
+  ]
+}

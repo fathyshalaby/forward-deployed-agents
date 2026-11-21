@@ -1,0 +1,11 @@
+# Runtime state and local caches
+data/runtime/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# macOS
+.DS_Store

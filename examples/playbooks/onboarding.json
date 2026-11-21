@@ -1,0 +1,37 @@
+{
+  "id": "onboarding",
+  "name": "Customer onboarding",
+  "description": "Example playbook: discover granted capabilities, open a welcome ticket and announce the handover. Replace or copy it for your own product.",
+  "purpose": "customer onboarding",
+  "tags": ["example", "onboarding"],
+  "steps": [
+    {
+      "id": "discover",
+      "title": "List the connectors the customer granted",
+      "tool": "connectors.list",
+      "needs": ["metadata"]
+    },
+    {
+      "id": "welcome_ticket",
+      "title": "Open the onboarding ticket",
+      "tool": "connectors.call",
+      "connector": "tickets",
+      "action": "tickets.create",
+      "scopes": ["read", "write"],
+      "needs": ["metadata"],
+      "write": true,
+      "purpose": "customer onboarding"
+    },
+    {
+      "id": "announce",
+      "title": "Post the handover note in team chat",
+      "tool": "connectors.call",
+      "connector": "chat",
+      "action": "chat.post_update",
+      "scopes": ["read", "write"],
+      "needs": ["metadata"],
+      "write": true,
+      "purpose": "customer onboarding"
+    }
+  ]
+}

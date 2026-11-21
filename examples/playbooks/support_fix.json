@@ -1,0 +1,49 @@
+{
+  "id": "support_fix",
+  "name": "Support complaint to fix",
+  "description": "Example playbook: read aggregate signals, open a tracking issue and reply on the ticket. The agent reasons about the complaint; the playbook only controls the actions and their gates.",
+  "purpose": "incident remediation",
+  "tags": ["example", "support", "it-ops"],
+  "steps": [
+    {
+      "id": "metrics",
+      "title": "Read aggregate error and latency signals",
+      "tool": "connectors.call",
+      "connector": "observability",
+      "action": "observability.get_metrics",
+      "scopes": ["read"],
+      "needs": ["aggregate"]
+    },
+    {
+      "id": "incidents",
+      "title": "Read the current incident summary",
+      "tool": "connectors.call",
+      "connector": "observability",
+      "action": "observability.get_incident_summary",
+      "scopes": ["read"],
+      "needs": ["aggregate"]
+    },
+    {
+      "id": "open_issue",
+      "title": "Open an engineering issue",
+      "tool": "connectors.call",
+      "connector": "repo",
+      "action": "repo.open_issue",
+      "scopes": ["read", "write"],
+      "needs": ["metadata"],
+      "write": true,
+      "purpose": "incident remediation"
+    },
+    {
+      "id": "reply",
+      "title": "Reply on the customer ticket",
+      "tool": "connectors.call",
+      "connector": "tickets",
+      "action": "tickets.comment",
+      "scopes": ["read", "write"],
+      "needs": ["metadata"],
+      "write": true,
+      "purpose": "incident remediation"
+    }
+  ]
+}
