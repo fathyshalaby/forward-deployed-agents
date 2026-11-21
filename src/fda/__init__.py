@@ -1,7 +1,8 @@
-"""Forward-deployed agent prototype: onboarding, complaints and IT fixes.
+"""Forward-deployed agent framework.
 
-Standard library only. The agent runs inside the customer boundary, uses
-connectors the customer owns, and never receives credentials.
+Standard library only. Agents run inside the customer boundary, use connectors
+the customer owns, and never receive credentials. Installable agent bundles let
+third parties ship playbooks, descriptors and AI skills as one versioned unit.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.4.0"

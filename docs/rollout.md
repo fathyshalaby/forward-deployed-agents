@@ -10,6 +10,7 @@ earn each additional permission.
 | 2. Diagnose | Aggregate and metadata reads across systems | Evidence summaries trusted by support |
 | 3. Gated fixes | Writes, one approval each, with rollback notes | Denial rate and revert rate acceptable |
 | 4. Broader plays | Customer-authored playbooks in production | Customer maintains its own library |
+| 5. Bundled agents | Third-party agent bundles installed and reviewed | Signed provenance verified, hashes pinned, revocation and kill switch rehearsed |
 
 ## What to measure
 
@@ -30,8 +31,10 @@ earn each additional permission.
 - Content playbooks require a separate customer decision.
 - The audit trail is append-only and lives inside the customer boundary.
 
-## Prototype limitations
+## Deployment notes
 
-Runs and play status are in memory. Connectors are simulated. The approval
-grant tool is a demo. Real deployment needs durable state, real adapters, a
-customer approval UI and a write-only audit sink.
+Runs, approvals and the audit trail are durable in SQLite. Set
+`FDA_APPROVAL_MODE=external`, require signatures, pin reviewed bundle hashes and
+start the approval UI as a separate process. Connectors remain simulated until
+an operator registers real handlers; the audit chain should also be shipped to
+a write-only sink. See [docs/deployment.md](deployment.md).

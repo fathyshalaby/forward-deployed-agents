@@ -39,8 +39,10 @@ class MCPServer:
                     "capabilities": {"tools": {"listChanged": False}},
                     "serverInfo": {"name": "forward-deployed-agents", "version": __version__},
                     "instructions": (
-                        "Use plays.list and play.describe before acting. Prefer "
-                        "play.plan, then human approval, then play.run. Audit every run."
+                        "Use agents.list to see installed agents, then plays.list "
+                        "and play.describe before acting. Prefer play.plan, then "
+                        "human approval (out-of-band in external mode), then "
+                        "play.run. Audit every run."
                     ),
                 }
             elif method == "ping":

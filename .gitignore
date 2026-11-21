@@ -6,6 +6,11 @@ data/runtime/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+build/
+*.egg-info/
+
+# Local agent store override (the default lives outside the repo)
+.fda-store/
 
 # macOS
 .DS_Store

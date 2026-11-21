@@ -1,9 +1,12 @@
 """Generic MCP tools exposed by the framework."""
-from typing import Dict, List
+from typing import List
 
+from .bundle import BundleError, bundle_skill_text, default_store, load_bundle_dir
+from .connectors import ConnectorError
 from .plays import PlayError
+from .privacy import PrivacyError
 
-TOOL_VERSION = "0.1.0"
+TOOL_VERSION = "0.3.0"
 
 
 class ToolError(Exception):
@@ -63,11 +66,61 @@ def approval_request(runtime, args):
 
 
 def approval_grant(runtime, args):
-    return runtime.approvals.grant(args["approval_id"], args["approver"])
+    return runtime.approvals.grant(
+        args["approval_id"], args["approver"], mode=runtime.approval_mode)
+
+
+def approval_status(runtime, args):
+    return runtime.approvals.status(args["approval_id"])
+
+
+def ops_status(runtime, args):
+    state = runtime.state
+    return {
+        "approval_mode": runtime.approval_mode,
+        "tenant": runtime.tenant,
+        "actor": runtime.actor,
+        "state_path": str(state.path) if state else "",
+        "kill_switch": state.kill_check(runtime.tenant) if state else {"paused": False},
+        "stats": state.stats() if state else {},
+        "audit_chain": state.audit_verify() if state else {"entries": 0, "ok": True},
+    }
 
 
 def audit_explain(runtime, args):
     return runtime.audit.explain(args.get("limit", 30))
+
+
+def agents_list(runtime, args):
+    return {
+        "agents": runtime.bundles,
+        "store": str(default_store()),
+        "count": len(runtime.bundles),
+    }
+
+
+def _installed(runtime, identifier: str):
+    for row in runtime.bundles:
+        if row["id"] == identifier:
+            return row
+    raise ToolError("unknown agent: %s" % identifier)
+
+
+def agent_describe(runtime, args):
+    row = _installed(runtime, args["agent_id"])
+    return {key: value for key, value in row.items() if key != "source"}
+
+
+def agent_skill(runtime, args):
+    row = _installed(runtime, args["agent_id"])
+    bundle = load_bundle_dir(row["source"])
+    return {
+        "agent_id": row["id"],
+        "name": row["name"],
+        "skill": bundle_skill_text(
+            bundle, prefer_custom=bool(args.get("prefer_custom", True))
+        ),
+    }
 
 
 TOOLS: List[dict] = [
@@ -136,12 +189,24 @@ TOOLS: List[dict] = [
     },
     {
         "name": "approval.grant",
-        "description": "DEMO ONLY: simulate a human granting an approval. Replace with your customer approval UI in production.",
+        "description": "Grant an approval in demo mode only. In FDA_APPROVAL_MODE=external this always fails; use the out-of-band approval UI or `fda approvals grant`.",
         "inputSchema": _obj({
             "approval_id": _str("Approval id"),
             "approver": _str("Name or role of the human approver"),
         }, ["approval_id", "approver"]),
         "handler": approval_grant,
+    },
+    {
+        "name": "approval.status",
+        "description": "Read the status and exact bindings of an approval request without changing it.",
+        "inputSchema": _obj({"approval_id": _str("Approval id")}, ["approval_id"]),
+        "handler": approval_status,
+    },
+    {
+        "name": "ops.status",
+        "description": "Report approval mode, tenant, kill switch state, counters and audit chain integrity.",
+        "inputSchema": _obj(),
+        "handler": ops_status,
     },
     {
         "name": "audit.explain",
@@ -150,6 +215,27 @@ TOOLS: List[dict] = [
             "limit": {"type": "integer", "description": "How many recent entries to show"}
         }),
         "handler": audit_explain,
+    },
+    {
+        "name": "agents.list",
+        "description": "List agent bundles installed on this server, with versions, playbooks and connectors.",
+        "inputSchema": _obj(),
+        "handler": agents_list,
+    },
+    {
+        "name": "agent.describe",
+        "description": "Describe one installed agent bundle without running anything.",
+        "inputSchema": _obj({"agent_id": _str("Agent bundle id")}, ["agent_id"]),
+        "handler": agent_describe,
+    },
+    {
+        "name": "agent.skill",
+        "description": "Return the AI skill markdown for an installed agent, ready to save into a client skills directory.",
+        "inputSchema": _obj({
+            "agent_id": _str("Agent bundle id"),
+            "prefer_custom": {"type": "boolean", "description": "Use the bundle's own SKILL.md when present"},
+        }, ["agent_id"]),
+        "handler": agent_skill,
     },
 ]
 
@@ -166,6 +252,7 @@ def call_tool(runtime, name: str, arguments: dict) -> dict:
         if tool["name"] == name:
             try:
                 return tool["handler"](runtime, arguments or {})
-            except (ToolError, PlayError, KeyError, TypeError) as exc:
+            except (ToolError, PlayError, PrivacyError, ConnectorError,
+                    BundleError, KeyError, TypeError, ValueError, OSError) as exc:
                 raise ToolError(str(exc))
     raise ToolError("unknown tool: %s" % name)

@@ -67,11 +67,21 @@ class ConnectorRegistry:
 
     def __init__(self, descriptors=None):
         self._connectors: Dict[str, Connector] = {}
+        self._handlers = {}
         for descriptor in descriptors or []:
             self.register(Connector(**descriptor))
 
     def register(self, connector: Connector) -> None:
         self._connectors[connector.id] = connector
+
+    def register_handler(self, action: str, handler) -> None:
+        """Wire a real adapter for one granted action (operator-side only).
+
+        Bundles are declarative and cannot register Python. The operator binds
+        an action to a callable that receives a context dict and returns a small
+        typed result dict.
+        """
+        self._handlers[action] = handler
 
     def list_public(self) -> List[dict]:
         return [self._connectors[key].public() for key in sorted(self._connectors)]
@@ -98,9 +108,20 @@ class ConnectorRegistry:
         if not required.issubset(set(connector.scopes)):
             missing = sorted(required - set(connector.scopes))
             raise ConnectorError("scope not granted: %s" % ", ".join(missing))
-        if key not in SIMULATED_RESULTS:
-            raise ConnectorError("no simulated handler for %s" % key)
-        result = dict(SIMULATED_RESULTS[key])
+        if key in self._handlers:
+            result = dict(self._handlers[key]({
+                "connector": connector_id,
+                "action": key,
+                "scopes": sorted(required),
+                "needs": sorted(set(needs or [])),
+            }))
+            result["mode"] = "adapter"
+        else:
+            # Namespaced bundle actions map back to the built-in demo result.
+            base_key = key.split("::", 1)[1] if "::" in key else key
+            payload = SIMULATED_RESULTS.get(key, SIMULATED_RESULTS.get(base_key))
+            result = dict(payload) if payload else {"ok": True}
+            result["mode"] = "simulated"
         result["call_id"] = new_id("c", 10)
         result["action"] = key
         result["needs"] = sorted(set(needs or []))

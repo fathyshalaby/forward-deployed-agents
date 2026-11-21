@@ -5,6 +5,7 @@ Nothing in the engine is specific to onboarding, support or IT: bring your own
 playbooks and connectors. The engine only enforces scope, data minimisation,
 approval and audit.
 """
+import hashlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -83,6 +84,7 @@ class Playbook:
     tags: List[str]
     steps: List[Step]
     source: str = ""
+    content_hash: str = ""
 
     @classmethod
     def from_dict(cls, raw: dict, source: str = "") -> "Playbook":
@@ -120,22 +122,42 @@ def load_playbooks(directory) -> Dict[str, Playbook]:
     if not root.exists():
         return playbooks
     for path in sorted(root.rglob("*.json")):
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        raw = path.read_bytes()
+        payload = json.loads(raw.decode("utf-8"))
         play = Playbook.from_dict(payload, source=str(path))
+        play.content_hash = hashlib.sha256(raw).hexdigest()
         if play.id in playbooks:
             raise PlayError("duplicate playbook id: %s" % play.id)
         playbooks[play.id] = play
     return playbooks
 
 
+def _context_hash(context: dict) -> str:
+    """Hash non-sensitive scalar context so approvals bind to arguments."""
+    safe = {key: value for key, value in sorted(context.items())
+            if key not in ("tenant", "actor", "approver")
+            and isinstance(value, (str, int, float, bool))}
+    payload = json.dumps(safe, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _identity(context: dict, default_tenant="", default_actor=""):
+    return (context.get("tenant") or default_tenant,
+            context.get("actor") or default_actor)
+
+
 class PlayEngine:
     """Plans and runs playbooks through the privacy gate and connectors."""
 
-    def __init__(self, playbooks, connectors, privacy, audit):
+    def __init__(self, playbooks, connectors, privacy, audit, state=None,
+                 default_tenant="", default_actor=""):
         self.playbooks = playbooks
         self.connectors = connectors
         self.privacy = privacy
         self.audit = audit
+        self.state = state
+        self.default_tenant = default_tenant
+        self.default_actor = default_actor
         self.runs: Dict[str, dict] = {}
 
     def list(self) -> List[dict]:
@@ -157,6 +179,10 @@ class PlayEngine:
         """Return the steps and create single-use approval requests for gated steps."""
         play = self._get(play_id)
         context = context or {}
+        tenant, actor = _identity(context, self.default_tenant, self.default_actor)
+        self.audit.set_context(tenant, actor)
+        args_hash = _context_hash(context)
+        ttl = int(context.get("approval_ttl", 0) or 0)
         planned = []
         for step in play.steps:
             item = step.public()
@@ -166,19 +192,35 @@ class PlayEngine:
                     reason="%s: %s" % (play.name, step.title),
                     needs=step.needs,
                     purpose=step.purpose or play.purpose,
+                    actor=actor,
+                    playbook_hash=play.content_hash,
+                    args_hash=args_hash,
+                    ttl_seconds=ttl,
                 )
                 item["approval_id"] = request["approval_id"]
+                item["binding"] = {
+                    "actor": actor,
+                    "playbook_hash": play.content_hash,
+                    "args_hash": args_hash,
+                }
             else:
                 item["approval_id"] = ""
             planned.append(item)
         plan = {
             "play_id": play.id,
             "purpose": play.purpose,
+            "playbook_hash": play.content_hash,
+            "tenant": tenant,
+            "actor": actor,
             "context_keys": sorted(context),
             "steps": planned,
-            "next": "Call approval.grant for each approval_id, then play.run.",
+            "next": (
+                "Human grants each approval_id out-of-band, then call play.run."
+            ),
         }
-        self.audit.record("play.plan", "allow", play=play.id, steps=len(planned))
+        self.audit.record("play.plan", "allow", play=play.id, steps=len(planned),
+                          tenant=tenant, actor=actor,
+                          playbook_hash=play.content_hash)
         return plan
 
     def privacy_check(self, play_id: str, step_id: str) -> dict:
@@ -212,8 +254,22 @@ class PlayEngine:
         play = self._get(play_id)
         approvals = approvals or {}
         context = context or {}
+        tenant, actor = _identity(context, self.default_tenant, self.default_actor)
+        self.audit.set_context(tenant, actor)
+        args_hash = _context_hash(context)
         run_id = new_id("r")
         results = []
+
+        killed = self.state.kill_check(tenant) if self.state else {"paused": False}
+        if killed.get("paused"):
+            reason = "kill switch active for %s: %s" % (
+                killed.get("scope", "*"), killed.get("reason", ""))
+            self.audit.record("play.run", "deny", play=play.id, run=run_id,
+                              reason=reason)
+            run = {"run_id": run_id, "play": play.id, "status": "denied",
+                   "results": [{"step": "", "ok": False, "error": reason}],
+                   "denied_step": ""}
+            return self._finish(run, tenant, actor)
 
         for step in play.steps:
             if step.tool == "connectors.list":
@@ -237,6 +293,9 @@ class PlayEngine:
                 connector_id=step.connector,
                 approval_id=approval_id,
                 write=step.write,
+                actor=actor,
+                playbook_hash=play.content_hash,
+                args_hash=args_hash,
             )
             if decision["decision"] == "deny":
                 self.audit.record("play.run", "deny", play=play.id, run=run_id,
@@ -247,8 +306,7 @@ class PlayEngine:
                                 "error": decision["reason"]})
                 run = {"run_id": run_id, "play": play.id, "status": "denied",
                        "results": results, "denied_step": step.id}
-                self.runs[run_id] = run
-                return run
+                return self._finish(run, tenant, actor)
 
             try:
                 call = self.connectors.call(
@@ -261,8 +319,7 @@ class PlayEngine:
                 results.append({"step": step.id, "ok": False, "error": str(exc)})
                 run = {"run_id": run_id, "play": play.id, "status": "denied",
                        "results": results, "denied_step": step.id}
-                self.runs[run_id] = run
-                return run
+                return self._finish(run, tenant, actor)
 
             self.audit.record(
                 "play.run", "allow", play=play.id, run=run_id, step=step.id,
@@ -273,13 +330,23 @@ class PlayEngine:
             results.append({"step": step.id, "ok": True, "result": call})
 
         run = {"run_id": run_id, "play": play.id, "status": "complete",
-               "results": results, "context_keys": sorted(context)}
-        self.runs[run_id] = run
+               "results": results, "context_keys": sorted(context),
+               "tenant": tenant, "actor": actor}
         self.audit.record("play.run", "complete", play=play.id, run=run_id,
                           steps=len(results))
+        return self._finish(run, tenant, actor)
+
+    def _finish(self, run: dict, tenant: str, actor: str) -> dict:
+        self.runs[run["run_id"]] = run
+        if self.state:
+            self.state.run_save(run, tenant, actor)
         return run
 
     def status(self, run_id: str) -> dict:
-        if run_id not in self.runs:
-            raise PlayError("unknown run id: %s" % run_id)
-        return self.runs[run_id]
+        if run_id in self.runs:
+            return self.runs[run_id]
+        if self.state:
+            stored = self.state.run_get(run_id)
+            if stored:
+                return stored
+        raise PlayError("unknown run id: %s" % run_id)

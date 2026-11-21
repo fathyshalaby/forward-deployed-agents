@@ -18,8 +18,9 @@ framework supplies the engine; you supply the playbooks and the judgement.
 3. **Default to the smallest data class.** `aggregate` and `metadata` are the
    normal budget. `identifier` and `content` need a stated purpose and a
    purpose-bound, single-use approval.
-4. **Every write needs a human approval.** `play.plan` issues the approval ids;
-   `approval.grant` stands in for the customer UI in this prototype.
+4. **Every write needs a human approval.** `play.plan` issues the approval ids.
+   In production (`FDA_APPROVAL_MODE=external`) the human grants them in the
+   approval UI or with `fda approvals grant`; never ask the model to grant.
 5. **Fail closed.** A denial stops the run. Do not work around it with a
    different connector or by rewriting the purpose.
 6. **No content in the audit trail.** Free text is stored only as a hash.
@@ -30,11 +31,13 @@ framework supplies the engine; you supply the playbooks and the judgement.
 ## Operating pattern
 
 ```
-plays.list -> play.describe -> play.plan
-           -> human approval (approval.grant)
-           -> play.run -> play.status -> audit.explain
+agents.list -> plays.list -> play.describe -> play.plan
+            -> human approval (approval UI / CLI in external mode)
+            -> play.run -> play.status -> audit.explain -> ops.status
 ```
 
+- `agents.list` shows installed agent bundles. Their playbook and connector ids
+  are namespaced with `<bundle id>::`; use the full id in every other tool.
 - If the playbook is missing, write one (see below) rather than inventing
   connector calls at runtime.
 - If a step needs a scope the customer did not grant, stop and ask. Do not
@@ -86,6 +89,24 @@ Step rules:
 - `write: true` always adds an approval gate. `approval: true` can also gate
   a read explicitly.
 - A `note` step records an intent or handoff without calling a connector.
+
+## Shipping this as an agent bundle
+
+To hand an agent to another user, package the playbooks and connector
+descriptors as a bundle instead of asking them to edit Python or env vars:
+
+```sh
+python3 -m fda agents init ./my-agent --id acme.my-agent --name "My Agent"
+python3 -m fda agents validate ./my-agent
+python3 -m fda agents build ./my-agent -o dist/my-agent.fda
+```
+
+The recipient installs it with `python3 -m fda agents install dist/my-agent.fda`
+and can export the same rules as a client skill with
+`python3 -m fda agents skill acme.my-agent --target opencode`. See
+`docs/agent_bundles.md` for the manifest format and safety checks. For a
+customer deployment, sign the archive, publish and pin it, enable external
+approvals and rehearse the kill switch; see `docs/deployment.md`.
 
 ## Stop conditions
 

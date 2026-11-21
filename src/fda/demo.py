@@ -86,7 +86,7 @@ def main():
     })
     _show("audit.explain", call("audit.explain", {"limit": 12}))
 
-    print("\nDemo done. Swap examples/playbooks and examples/connectors.json for your own.")
+    print("\nDemo done. For a shareable agent, run: python3 -m fda agents init ./my-agent")
     return 0
 
 

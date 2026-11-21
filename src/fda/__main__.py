@@ -1,10 +1,5 @@
-"""Entry point: python3 -m fda  (MCP stdio server)."""
-from .mcp import stdio_loop
-from .runtime import load_runtime
-
-
-def main():
-    return stdio_loop(load_runtime())
+"""Entry point: python3 -m fda  (MCP stdio server by default)."""
+from .cli import main
 
 
 if __name__ == "__main__":

@@ -1,0 +1,62 @@
+services:
+  approvals:
+    build: .
+    image: fda:local
+    command: ["approvals", "serve", "--host", "0.0.0.0", "--port", "8787"]
+    environment:
+      FDA_APPROVER_TOKEN: ${FDA_APPROVER_TOKEN:?set FDA_APPROVER_TOKEN to a long random string}
+      FDA_STATE: /var/lib/fda/state.db
+      FDA_APPROVAL_MODE: external
+    ports:
+      - "127.0.0.1:8787:8787"
+    volumes:
+      - fda-state:/var/lib/fda
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8787/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # JSON API for product integrations (Python SDK or any language over HTTP).
+  api:
+    build: .
+    image: fda:local
+    command: ["api", "serve", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      FDA_API_TOKEN: ${FDA_API_TOKEN:?set FDA_API_TOKEN to a long random string}
+      FDA_STATE: /var/lib/fda/state.db
+      FDA_AGENTS: /var/lib/fda/agents
+      FDA_AUDIT: /var/lib/fda/audit.jsonl
+      FDA_APPROVAL_MODE: external
+      FDA_TENANT: ${FDA_TENANT:-default}
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - fda-state:/var/lib/fda
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/v1/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # MCP stdio server: start with `docker compose run --rm fda`.
+  fda:
+    profiles: ["mcp"]
+    build: .
+    image: fda:local
+    command: ["serve", "--no-examples"]
+    stdin_open: true
+    tty: false
+    environment:
+      FDA_STATE: /var/lib/fda/state.db
+      FDA_AGENTS: /var/lib/fda/agents
+      FDA_AUDIT: /var/lib/fda/audit.jsonl
+      FDA_APPROVAL_MODE: external
+      FDA_TENANT: ${FDA_TENANT:-default}
+    volumes:
+      - fda-state:/var/lib/fda
+
+volumes:
+  fda-state:

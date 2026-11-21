@@ -1,0 +1,27 @@
+[Unit]
+Description=FDA out-of-band approval UI
+After=network.target
+Documentation=https://github.com/fathyshalaby/forward-deployed-agents
+
+[Service]
+Type=simple
+User=fda
+Group=fda
+EnvironmentFile=/etc/fda/approvals.env
+ExecStart=/usr/local/bin/fda approvals serve \
+  --state /var/lib/fda/state.db \
+  --host 127.0.0.1 --port 8787
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+ReadWritePaths=/var/lib/fda
+
+[Install]
+WantedBy=multi-user.target

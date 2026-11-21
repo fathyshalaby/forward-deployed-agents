@@ -1,0 +1,18 @@
+[
+  {
+    "id": "deploy",
+    "name": "Deploy pipeline",
+    "scopes": ["read"],
+    "actions": ["deploy.status", "deploy.recent_events"],
+    "approval_required": [],
+    "description": "Aggregate deploy signals only. No logs or payloads."
+  },
+  {
+    "id": "chat",
+    "name": "On-call channel",
+    "scopes": ["read", "write"],
+    "actions": ["chat.post_update"],
+    "approval_required": ["chat.post_update"],
+    "description": "Posts a short metadata-only update after human approval."
+  }
+]

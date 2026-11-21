@@ -60,19 +60,27 @@ single-use approval per write.
 
 Be blunt about this in customer conversations:
 
-- Connectors are simulated. No real ticketing, chat, repo or identity system was
-  touched.
-- Runs, approvals and play status are in memory. A process restart loses them.
-- `approval.grant` is a demo stand-in, not a customer approval UI.
-- No language model is in the loop. The prototype tests the **control plane**;
-  it does not test whether an agent chooses the right play or explains itself
+- Connectors are simulated until an operator registers real handlers. No
+  ticketing, chat, repo or identity system is contacted by this repository.
+- Runs, approvals and the audit trail are durable in SQLite, but this is not a
+  workflow engine: no retries, queues, scheduling or rollback execution.
+- `approval.grant` is deliberately disabled in `external` mode; the shipped
+  approval UI is minimal. Real deployments still need SSO, TLS and a reviewed
+  approver role model.
+- No language model is in the loop. The tests exercise the **control plane**;
+  they do not test whether an agent chooses the right play or explains itself
   well.
-- Tool definitions are not hashed or re-approved, so the "rug pull" attack is
-  not addressed.
-- There is no per-request human/agent identity, no short-lived scoped token, no
-  container isolation, no SIEM sink, no kill switch and no rollback execution.
+- Tool definitions and connector handlers are not hashed into an approval, so a
+  handler swapped by an operator is not re-approved. Bundle playbooks are hashed
+  and pinned; operator code is trusted by definition.
+- There is no short-lived scoped token for connectors, no SIEM sink in-tree and
+  no secret broker. The audit chain detects edits in the database, but a writer
+  with database access can recompute it; ship entries to a write-only sink.
 - There is no offline evaluation set or prompt-injection red team. The scenario
   matrix is a policy test, not a quality evaluation.
+- Signatures use a shared HMAC key, not public-key non-repudiation, and there is
+  no dependency resolution or compatibility check beyond the advisory
+  `requires.fda` hint. See [docs/security.md](security.md).
 
 ## 4. The design choices and why
 
@@ -157,7 +165,23 @@ enforces.** None of those three should do another one's job.
 - Measure approval rate, denial rate, revert rate and data-class drift. Falling
   content use is a good sign; rising exception requests are not.
 
-### 5.7 Product sequencing
+### 5.7 Agent bundles as a distribution unit
+
+The plug-in layer in `bundle.py` turns "bring your own playbooks" into something
+you can hand to another person: a versioned manifest, playbooks, connector
+descriptors and an optional AI skill in one `.fda` archive. Validation rejects
+unknown fields, undeclared connectors, unsafe archive paths, symlinks and
+oversized files; install validates before writing to the store. Ids are namespaced
+at load, so two bundles can both declare a `chat` connector.
+
+The supply-chain controls are now part of the runtime: HMAC-signed manifests,
+a publisher trust store, a local or read-only HTTP registry, pinned content
+hashes, revocation and a kill switch. Bundles still never carry Python: real
+adapters are registered operator-side in `ConnectorRegistry`. Signing gives
+tamper detection and explicit trust, not public-key non-repudiation; the upgrade
+path to asymmetric signatures is described in [docs/security.md](security.md).
+
+### 5.8 Product sequencing
 
 The safest first deployments are bounded, high-volume, verifiable workflows with
 an obvious human fallback: internal IT/HR helpdesk, onboarding, ticket triage.

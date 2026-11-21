@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fda-state
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: fda-approver
+type: Opaque
+stringData:
+  # Replace with a generated token; never commit the rendered manifest.
+  token: "CHANGE-ME"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fda-approvals
+  labels:
+    app: fda-approvals
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fda-approvals
+  template:
+    metadata:
+      labels:
+        app: fda-approvals
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: approvals
+          image: fda:latest
+          command: ["fda", "approvals", "serve", "--host", "0.0.0.0", "--port", "8787"]
+          env:
+            - name: FDA_STATE
+              value: /var/lib/fda/state.db
+            - name: FDA_APPROVAL_MODE
+              value: external
+            - name: FDA_APPROVER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: fda-approver
+                  key: token
+          ports:
+            - containerPort: 8787
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8787
+          volumeMounts:
+            - name: state
+              mountPath: /var/lib/fda
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: state
+          persistentVolumeClaim:
+            claimName: fda-state
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fda-approvals
+spec:
+  selector:
+    app: fda-approvals
+  ports:
+    - port: 8787
+      targetPort: 8787

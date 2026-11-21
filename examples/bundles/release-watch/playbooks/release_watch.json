@@ -1,0 +1,38 @@
+{
+  "id": "release_watch",
+  "name": "Watch a release and notify on-call",
+  "description": "Read aggregate deploy signals, identify the owner, then ask for approval before posting an update.",
+  "purpose": "reviewed release notification",
+  "tags": ["example", "release"],
+  "steps": [
+    {
+      "id": "status",
+      "title": "Read the aggregate deploy status",
+      "tool": "connectors.call",
+      "connector": "deploy",
+      "action": "deploy.status",
+      "scopes": ["read"],
+      "needs": ["aggregate"]
+    },
+    {
+      "id": "owner",
+      "title": "Find the owning team from metadata",
+      "tool": "connectors.call",
+      "connector": "deploy",
+      "action": "deploy.recent_events",
+      "scopes": ["read"],
+      "needs": ["metadata"]
+    },
+    {
+      "id": "notify",
+      "title": "Post the reviewed update in the on-call channel",
+      "tool": "connectors.call",
+      "connector": "chat",
+      "action": "chat.post_update",
+      "scopes": ["read", "write"],
+      "needs": ["metadata"],
+      "write": true,
+      "purpose": "reviewed release notification"
+    }
+  ]
+}

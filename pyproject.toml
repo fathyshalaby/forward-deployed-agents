@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "forward-deployed-agents"
+version = "0.4.0"
+description = "Run governed agents inside a customer boundary with user-owned connectors and installable agent bundles."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Fathy Shalaby" }]
+keywords = ["agents", "mcp", "ai", "playbooks", "governance"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.scripts]
+fda = "fda.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["fda"]
+
+[tool.setuptools.package-data]
+fda = []

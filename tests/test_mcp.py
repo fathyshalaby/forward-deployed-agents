@@ -25,9 +25,14 @@ class MCPTests(unittest.TestCase):
         response = self.server.handle({"jsonrpc": "2.0", "id": 2, "method": "ping"})
         self.assertEqual(response["result"], {})
 
-    def test_tools_list_has_ten_tools(self):
+    def test_tools_list_covers_control_plane_and_bundles(self):
         response = self.server.handle({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
-        self.assertEqual(len(response["result"]["tools"]), 10)
+        names = [tool["name"] for tool in response["result"]["tools"]]
+        self.assertEqual(len(names), 15)
+        for name in ("plays.list", "play.run", "approval.grant", "approval.status",
+                     "audit.explain", "agents.list", "agent.describe", "agent.skill",
+                     "ops.status"):
+            self.assertIn(name, names)
 
     def test_tools_call_wraps_json_content(self):
         response = self.server.handle({
