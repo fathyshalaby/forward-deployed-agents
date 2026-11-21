@@ -23,7 +23,7 @@ class SkillAndDocsTests(unittest.TestCase):
         for name in ("architecture", "playbook_authoring", "privacy_model",
                      "mcp_tools", "rollout", "from_enron_case", "agent_bundles",
                      "connect_an_ai", "chatgpt_and_claude", "onboarding_prompt",
-                     "builder_prompt", "boilerplate", "tutorial", "faq",
+                     "builder_prompt", "boilerplate", "install", "tutorial", "faq",
                      "deployment", "security", "integrating"):
             self.assertTrue((REPO_ROOT / "docs" / ("%s.md" % name)).exists())
 

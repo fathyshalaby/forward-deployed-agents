@@ -1,7 +1,8 @@
 # Docs
 
-Start here: [boilerplate.md](boilerplate.md) is the short contract used by the
-meta-skill. For a copy/paste prompt, use [builder_prompt.md](builder_prompt.md).
+Start with [install.md](install.md) for the GitHub repo link and one-command
+install. [boilerplate.md](boilerplate.md) is the short contract used by the
+meta-skill; [builder_prompt.md](builder_prompt.md) is the copy/paste prompt.
 
 Everything below is reference material:
 

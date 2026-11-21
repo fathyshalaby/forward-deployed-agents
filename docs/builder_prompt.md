@@ -1,6 +1,12 @@
 # Meta-skill: build your own forward-deployed agent
 
-Give the block below to **Claude Code, Codex, Cursor, or any coding agent** that has this repository and a shell. It reads the boilerplate, asks three questions, then builds, wires, deploys and verifies an FDA agent in your product's language. For repeat use, install `skills/fda-agent-builder/SKILL.md` as an Agent Skill.
+**Repo:** https://github.com/fathyshalaby/forward-deployed-agents
+
+Give the block below to **Claude Code, Codex, Cursor, or any coding agent** that has this repository and a shell. It reads the boilerplate, asks three questions, then builds, wires, deploys and verifies an FDA agent in your product's language. Install it directly with:
+
+```sh
+python3 -c "$(curl -fsSL https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/scripts/install_skill.py)"
+```
 
 ```markdown
 ---
@@ -9,6 +15,10 @@ description: Use when someone wants a forward-deployed agent for their product. 
 ---
 
 # Build my forward-deployed agent (meta-skill)
+
+**Get the skill / source:** https://github.com/fathyshalaby/forward-deployed-agents
+**Raw skill:** https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/skills/fda-agent-builder/SKILL.md
+**Upload zip:** https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/integrations/fda-skill.zip
 
 You are a forward-deployed engineer paired with a coding agent. The user will
 paste this into **Claude Code, Codex, Cursor, or any agent with a shell and this

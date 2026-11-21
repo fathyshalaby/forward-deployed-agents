@@ -5,4 +5,4 @@ the customer owns, and never receive credentials. Installable agent bundles let
 third parties ship playbooks, descriptors and AI skills as one versioned unit.
 """
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"

@@ -1,7 +1,7 @@
 PYTHON ?= python3
 export PYTHONPATH := src:.
 
-.PHONY: test demo tutorial serve api-serve integration-example check check-deploy scenarios all clean install \
+.PHONY: test demo tutorial install-skill serve api-serve integration-example check check-deploy scenarios all clean install \
         agents agents-list bundle-init bundle-validate bundle-build bundle-install \
         bundle-sign registry-init registry-publish approvals-ui ops-status audit-verify
 
@@ -13,6 +13,9 @@ demo:
 
 tutorial:
 	$(PYTHON) -m fda tutorial
+
+install-skill:
+	$(PYTHON) scripts/install_skill.py
 
 serve:
 	$(PYTHON) -m fda serve

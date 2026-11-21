@@ -15,11 +15,21 @@ product's own language.
 fda skill          # print the meta-skill (same as: fda skill builder, fda meta)
 ```
 
-Or install the file directly:
+**Repo:** https://github.com/fathyshalaby/forward-deployed-agents
 
-- [`skills/fda-agent-builder/SKILL.md`](skills/fda-agent-builder/SKILL.md) — the skill
-- [`docs/builder_prompt.md`](docs/builder_prompt.md) — copy/paste version
-- [`integrations/fda-skill.zip`](integrations/fda-skill.zip) — Claude upload / plugin
+Install the skill directly from GitHub, no checkout needed:
+
+```sh
+python3 -c "$(curl -fsSL https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/scripts/install_skill.py)"
+```
+
+Or grab the files directly:
+
+- [Raw meta-skill](https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/skills/fda-agent-builder/SKILL.md)
+- [Claude upload zip](https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/integrations/fda-skill.zip)
+- [Copy/paste prompt](https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/docs/builder_prompt.md)
+- [Claude plugin](https://github.com/fathyshalaby/forward-deployed-agents/tree/main/plugins/fda-claude)
+- Full guide: [`docs/install.md`](docs/install.md)
 
 The product does **not** have to be Python. FDA runs as a small service; the
 product calls its JSON API, and real connector actions are signed webhook

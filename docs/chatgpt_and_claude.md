@@ -91,8 +91,11 @@ Quit and reopen Claude Desktop. Test with "call fda `agents.list`". Logs are in
 
 Upload the meta-skill once: **Customize → Skills → `+` → Create skill → Upload a
 skill** and select [`integrations/fda-skill.zip`](../integrations/fda-skill.zip).
+Download it straight from GitHub if you do not have the repo:
+https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/integrations/fda-skill.zip
 It contains one skill, `fda-agent-builder`, which reads our boilerplate and
-builds an agent for any product/language. You can also paste the prompt from
+builds an agent for any product/language. You can also install it with one
+command (see [install.md](install.md)) or paste the prompt from
 [builder_prompt.md](builder_prompt.md) into Claude Code, Codex or any chat with
 a shell.
 

@@ -56,18 +56,21 @@ def main():
     with __import__("zipfile").ZipFile(ROOT / "integrations" / "fda-skill.zip") as zf:
         assert zf.namelist() == ["fda-agent-builder/SKILL.md"], \
             "skill upload must contain only the meta-skill"
+    installer = read("scripts/install_skill.py")
+    assert "raw.githubusercontent.com" in installer, "installer needs GitHub raw URL"
+    assert "fda-agent-builder" in installer, "installer must install the meta-skill"
 
     for doc in ("docs/deployment.md", "docs/security.md", "docs/integrating.md",
                 "docs/chatgpt_and_claude.md", "docs/onboarding_prompt.md",
-                "docs/builder_prompt.md", "docs/boilerplate.md", "docs/README.md",
-                "docs/tutorial.md", "docs/faq.md"):
+                "docs/builder_prompt.md", "docs/boilerplate.md", "docs/install.md",
+                "docs/README.md", "docs/tutorial.md", "docs/faq.md"):
         text = read(doc)
         assert len(text) > 500, "%s looks empty" % doc
 
     workflow = read(".github/workflows/ci.yml")
     assert "make all" in workflow, "CI must run make all"
 
-    print("Deployment and integration artifacts checked: 21 files")
+    print("Deployment and integration artifacts checked: 22 files")
     print("ALL CLEAN")
     return 0
 

@@ -29,7 +29,7 @@ planning, approvals, audit and the kill switch.
 
 ```sh
 python3 -m pip install .
-fda --version          # 0.6.0
+fda --version          # 0.6.1
 fda doctor
 ```
 

@@ -11,6 +11,10 @@ description: Use when someone wants a forward-deployed agent for their product. 
 
 # Build my forward-deployed agent (meta-skill)
 
+**Get the skill / source:** https://github.com/fathyshalaby/forward-deployed-agents
+**Raw skill:** https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/skills/fda-agent-builder/SKILL.md
+**Upload zip:** https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/integrations/fda-skill.zip
+
 You are a forward-deployed engineer paired with a coding agent. The user will
 paste this into **Claude Code, Codex, Cursor, or any agent with a shell and this
 repository**. Your output is a working agent, not a design document.
