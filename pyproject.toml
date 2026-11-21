@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "forward-deployed-agents"
-version = "0.5.0"
+version = "0.6.0"
 description = "Run governed agents inside a customer boundary with user-owned connectors and installable agent bundles."
 readme = "README.md"
 requires-python = ">=3.8"

@@ -29,7 +29,7 @@ planning, approvals, audit and the kill switch.
 
 ```sh
 python3 -m pip install .
-fda --version          # 0.5.0
+fda --version          # 0.6.0
 fda doctor
 ```
 
@@ -212,7 +212,10 @@ assert result.ok, result.results
 ```
 
 Handlers receive only `{connector, action, scopes, needs}` and return a small
-dict. Never log free text or send customer content to an external model.
+dict. Never log free text or send customer content to an external model. If
+your product is not Python, use `FDA_HANDLERS` instead: map the same action to
+an HTTP endpoint in your own language and verify `X-FDA-Signature`. See
+[boilerplate.md](boilerplate.md) for the exact contract.
 
 ## 7. Drive it from AI clients
 
@@ -290,20 +293,21 @@ fda ops revoke acme.support-triage --version 0.1.0 --reason compromised
 
 Never report success without a run id and a verified audit entry.
 
-## 10. Let the onboarding engineer do it for you
+## 10. Let the meta-skill do it for you
 
-Once you understand the loop, hand steps 3–9 to the AI:
+Once you understand the loop, hand steps 3–9 to Claude Code, Codex or any coding
+agent:
 
 ```sh
-fda skill onboarding             # prints the copy-paste prompt
+fda skill                        # prints the one meta-skill
 ```
 
-Paste that into ChatGPT or Claude with a product description. It interviews
-the product owner, designs the play table, scaffolds the bundle, wires
-handlers, signs and pins it, deploys, connects the AI clients, runs the full
-verification and ends with a handoff record. The same text is installable from
-`skills/fda-onboarding-engineer/SKILL.md` and is bundled in
-`integrations/fda-skill.zip`.
+Paste it with a product description. It reads `docs/boilerplate.md`, asks three
+questions, scaffolds the bundle, writes language-agnostic webhook handlers,
+signs and pins it, deploys, connects the AI clients and verifies the run. The
+same text is installable from `skills/fda-agent-builder/SKILL.md` and is bundled
+in `integrations/fda-skill.zip`. The older `fda skill onboarding` prompt remains
+available for the longer interview format.
 
 ## Troubleshooting
 

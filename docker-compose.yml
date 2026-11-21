@@ -30,6 +30,8 @@ services:
       FDA_AUDIT: /var/lib/fda/audit.jsonl
       FDA_APPROVAL_MODE: external
       FDA_TENANT: ${FDA_TENANT:-default}
+      FDA_HANDLERS: ${FDA_HANDLERS:-}
+      FDA_HANDLER_SECRET: ${FDA_HANDLER_SECRET:-}
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
@@ -52,6 +54,8 @@ services:
       FDA_AGENTS: /var/lib/fda/agents
       FDA_AUDIT: /var/lib/fda/audit.jsonl
       FDA_APPROVAL_MODE: external
+      FDA_HANDLERS: ${FDA_HANDLERS:-}
+      FDA_HANDLER_SECRET: ${FDA_HANDLER_SECRET:-}
     ports:
       - "127.0.0.1:8000:8000"
     volumes:

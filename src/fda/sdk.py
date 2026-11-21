@@ -409,6 +409,11 @@ class Client:
         """Bind an operator-side callable to one granted action."""
         self.runtime.connectors.register_handler(action, handler)
 
+    def register_webhook(self, action: str, url: str, secret: str = "",
+                         timeout: float = 5.0, headers: Optional[dict] = None) -> None:
+        """Bind an action to an HTTP endpoint implemented in any language."""
+        self.runtime.connectors.bind_webhook(action, url, secret, timeout, headers)
+
     def list_connectors(self) -> dict:
         return {"connectors": self.runtime.connectors.list_public()}
 

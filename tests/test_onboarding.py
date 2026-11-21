@@ -23,7 +23,6 @@ class OnboardingSkillTests(unittest.TestCase):
     def test_skill_files_and_prompt_stay_in_sync(self):
         for relative in (
             "skills/fda-onboarding-engineer/SKILL.md",
-            "plugins/fda-claude/skills/fda-onboarding-engineer/SKILL.md",
         ):
             self.assertEqual((ROOT / relative).read_text(), ONBOARDING_SKILL)
         prompt = (ROOT / "docs/onboarding_prompt.md").read_text()
@@ -37,12 +36,12 @@ class OnboardingSkillTests(unittest.TestCase):
                        "Stop conditions", "Handoff record"):
             self.assertIn(phrase, ONBOARDING_SKILL)
 
-    def test_uploadable_zip_has_both_skills(self):
+    def test_uploadable_zip_leads_with_the_meta_skill(self):
         archive = ROOT / "integrations/fda-skill.zip"
         with zipfile.ZipFile(archive) as bundle:
             names = set(bundle.namelist())
-        self.assertIn("fda-forward-deployed-agents/SKILL.md", names)
-        self.assertIn("fda-onboarding-engineer/SKILL.md", names)
+        self.assertIn("fda-agent-builder/SKILL.md", names)
+        self.assertEqual(len(names), 1)
 
     def test_plugin_manifest_is_valid_json(self):
         manifest = ROOT / "plugins/fda-claude/.claude-plugin/plugin.json"

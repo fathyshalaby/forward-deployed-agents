@@ -24,7 +24,7 @@ class TutorialTests(unittest.TestCase):
         for phrase in ("Install and check", "Author your own bundle",
                        "Package, sign", "Turn on real approvals",
                        "Wire your real product APIs", "Drive it from AI clients",
-                       "Deploy it", "Verify and operate", "onboarding engineer",
+                       "Deploy it", "Verify and operate", "meta-skill",
                        "Troubleshooting"):
             self.assertIn(phrase, TUTORIAL)
 

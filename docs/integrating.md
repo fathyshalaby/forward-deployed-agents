@@ -90,6 +90,12 @@ client.register_handler("acme.agent::chat.post", my_chat_api.post)
 The handler receives only `{connector, action, scopes, needs}` — no credentials
 and no free text. It must return a small JSON-serialisable dict.
 
+For a product that is not Python, skip the callable. Point `FDA_HANDLERS` at a
+JSON map of action → webhook URL and implement one route per action in your own
+language. FDA signs the raw body with `X-FDA-Signature`; the full request and
+response contract is in [boilerplate.md](boilerplate.md). In Python you can also
+use `client.register_webhook(action, url, secret=...)`.
+
 ### Tenancy
 
 Create one scoped view per request. The tenant and actor are written to the

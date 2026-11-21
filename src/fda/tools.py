@@ -6,7 +6,7 @@ from .connectors import ConnectorError
 from .plays import PlayError
 from .privacy import PrivacyError
 
-TOOL_VERSION = "0.4.0"
+TOOL_VERSION = "0.5.0"
 
 
 class ToolError(Exception):

@@ -8,6 +8,8 @@ JSON files for a single-agent server, or install agent bundles with
 In deployment mode the runtime uses a SQLite state store for runs, approvals,
 the hash-chained audit trail, revocations, pins and the kill switch. Set
 ``FDA_APPROVAL_MODE=external`` so the model cannot grant its own approvals.
+Set ``FDA_HANDLERS`` to a JSON file mapping actions to signed product webhooks;
+that is the language-agnostic bridge to real connectors.
 """
 import json
 import os
@@ -61,9 +63,37 @@ class Runtime:
     actor: str = ""
 
 
+def _bind_webhooks(connectors) -> None:
+    """Bind operator-side HTTP handlers from ``FDA_HANDLERS``.
+
+    The file maps a namespaced action to a product endpoint. Secrets are read
+    from the environment named by ``secret_env``; nothing enters a bundle.
+    """
+    config_path = os.environ.get("FDA_HANDLERS", "")
+    if not config_path:
+        return
+    try:
+        payload = json.loads(Path(config_path).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise ValueError("cannot read FDA_HANDLERS config") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("FDA_HANDLERS must map actions to handler configs")
+    for action, spec in payload.items():
+        if not isinstance(spec, dict) or not spec.get("url"):
+            raise ValueError("invalid FDA_HANDLERS entry: %s" % action)
+        secret_name = spec.get("secret_env", "")
+        secret = (os.environ.get(secret_name, "") if secret_name
+                  else spec.get("secret", ""))
+        connectors.bind_webhook(
+            action, str(spec["url"]), secret,
+            float(spec.get("timeout", 5.0)), spec.get("headers") or {},
+        )
+
+
 def _build(playbooks, descriptors, audit_path, persist_audit, bundles=(),
            state=None, approval_mode="demo", tenant="", actor=""):
     connectors = ConnectorRegistry(descriptors)
+    _bind_webhooks(connectors)
     approvals = ApprovalStore(state, mode=approval_mode)
     audit = AuditLog(audit_path if persist_audit else None, state=state,
                      tenant=tenant, actor=actor)

@@ -2,11 +2,15 @@
 
 A connector is a capability the customer grants to the agent. The agent sees a
 name, a set of scopes and a set of actions. It never sees a credential, endpoint
-or raw payload. This prototype simulates execution; a real deployment swaps the
-simulated result table for calls made inside the customer boundary.
+or raw payload. Real work is bound operator-side: either a callable (Python
+embedding) or an HMAC-signed webhook into the product's own stack (any language).
 """
+import hashlib
+import hmac
+import json
+import urllib.request
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from .util import new_id
 
@@ -39,6 +43,64 @@ SIMULATED_RESULTS = {
     "directory.find_team": {"team": "platform", "member_count": 6},
     "directory.get_owner": {"owner_role": "support-lead"},
 }
+
+
+MAX_HANDLER_RESPONSE = 64 * 1024
+
+
+class WebhookHandler:
+    """Operator-side adapter that calls a product endpoint for one action.
+
+    This is the language-agnostic bridge: FDA sends only the capability context
+    and the product answers with a small JSON object. The secret is read from
+    the operator's environment, never from an agent bundle.
+    """
+
+    def __init__(self, url: str, secret: str = "", timeout: float = 5.0,
+                 headers: Optional[dict] = None):
+        if not url:
+            raise ConnectorError("handler url is required")
+        self.url = url
+        self.secret = secret
+        self.timeout = timeout
+        self.headers = dict(headers or {})
+
+    def __call__(self, ctx: dict) -> dict:
+        body = json.dumps({
+            "connector": ctx.get("connector", ""),
+            "action": ctx.get("action", ""),
+            "scopes": list(ctx.get("scopes") or []),
+            "needs": list(ctx.get("needs") or []),
+        }, sort_keys=True).encode("utf-8")
+        headers = {"Content-Type": "application/json",
+                   "Accept": "application/json"}
+        if self.secret:
+            signature = hmac.new(self.secret.encode("utf-8"), body,
+                                 hashlib.sha256).hexdigest()
+            headers["X-FDA-Signature"] = "sha256=" + signature
+        headers.update(self.headers)
+        request = urllib.request.Request(self.url, data=body, headers=headers,
+                                         method="POST")
+        try:
+            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                raw = response.read(MAX_HANDLER_RESPONSE + 1)
+        except Exception as exc:  # never leak the url or a traceback to the agent
+            raise ConnectorError("handler failed: %s" % type(exc).__name__) from exc
+        if len(raw) > MAX_HANDLER_RESPONSE:
+            raise ConnectorError("handler response too large")
+        try:
+            payload = json.loads(raw.decode("utf-8")) if raw else {}
+        except (ValueError, UnicodeDecodeError) as exc:
+            raise ConnectorError("handler returned invalid JSON") from exc
+        if not isinstance(payload, dict):
+            raise ConnectorError("handler must return a JSON object")
+        return payload
+
+
+def webhook_handler(url: str, secret: str = "", timeout: float = 5.0,
+                    headers: Optional[dict] = None) -> WebhookHandler:
+    """Build an adapter for ``client.register_handler``."""
+    return WebhookHandler(url, secret, timeout, headers)
 
 
 @dataclass
@@ -82,6 +144,11 @@ class ConnectorRegistry:
         typed result dict.
         """
         self._handlers[action] = handler
+
+    def bind_webhook(self, action: str, url: str, secret: str = "",
+                     timeout: float = 5.0, headers: Optional[dict] = None) -> None:
+        """Bind an action to an HTTP endpoint implemented in any language."""
+        self._handlers[action] = WebhookHandler(url, secret, timeout, headers)
 
     def list_public(self) -> List[dict]:
         return [self._connectors[key].public() for key in sorted(self._connectors)]

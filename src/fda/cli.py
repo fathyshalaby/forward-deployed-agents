@@ -14,6 +14,7 @@ from .bundle import (
     export_skill, install_bundle, list_installed, load_bundle_dir,
     uninstall_bundle, validate_bundle_dir,
 )
+from .builder_skill import BUILDER_SKILL
 from .http_api import serve as serve_api
 from .mcp import stdio_loop
 from .mcp_http import serve as serve_mcp_http
@@ -441,6 +442,11 @@ def cmd_ops_audit_verify(args) -> int:
     return 0 if result["ok"] else 1
 
 
+def cmd_meta_skill(args) -> int:
+    print(BUILDER_SKILL, end="")
+    return 0
+
+
 def cmd_skill_onboarding(args) -> int:
     print(ONBOARDING_SKILL, end="")
     return 0
@@ -667,11 +673,17 @@ def build_parser() -> argparse.ArgumentParser:
     verify = with_state(ops_sub.add_parser("audit-verify", help="verify audit hash chain"))
     verify.set_defaults(func=cmd_ops_audit_verify)
 
-    skill = sub.add_parser("skill", help="print an installable Agent Skill")
-    skill_sub = skill.add_subparsers(dest="skill_command", required=True)
+    skill = sub.add_parser("skill", help="print the meta-skill (default)")
+    skill.set_defaults(func=cmd_meta_skill)
+    skill_sub = skill.add_subparsers(dest="skill_command")
+    builder = skill_sub.add_parser("builder", help="print the agent-builder meta-skill")
+    builder.set_defaults(func=cmd_meta_skill)
     onboarding = skill_sub.add_parser(
-        "onboarding", help="prompt for an agentic forward-deployed engineer")
+        "onboarding", help="legacy longer onboarding prompt")
     onboarding.set_defaults(func=cmd_skill_onboarding)
+
+    sub.add_parser("meta", help="alias for `fda skill`").set_defaults(
+        func=cmd_meta_skill)
 
     tutorial = sub.add_parser("tutorial", help="print the end-to-end tutorial")
     tutorial.set_defaults(func=cmd_tutorial)

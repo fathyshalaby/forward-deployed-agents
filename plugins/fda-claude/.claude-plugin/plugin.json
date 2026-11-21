@@ -1,7 +1,7 @@
 {
   "name": "fda-forward-deployed-agents",
-  "description": "Governed, bundle-based agents with durable runs, human approvals and audit. Adds the FDA MCP connector and the usage skill.",
-  "version": "0.5.0",
+  "description": "One meta-skill that turns Claude Code, Codex or any coding agent into a forward-deployed engineer: it reads the FDA boilerplate and builds, wires and verifies an agent in the product's language.",
+  "version": "0.6.0",
   "author": {
     "name": "fathyshalaby"
   },

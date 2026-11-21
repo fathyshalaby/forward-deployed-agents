@@ -22,6 +22,7 @@ def main():
     assert "fda-state" in compose, "compose needs a state volume"
     assert re.search(r"^\s+api:", compose, re.M), "compose needs the JSON API service"
     assert "FDA_API_TOKEN" in compose, "compose needs an API service token"
+    assert "FDA_HANDLERS" in compose, "compose must allow language-agnostic handlers"
 
     unit = read("deploy/systemd/fda-approvals.service")
     for directive in ("User=fda", "NoNewPrivileges=true", "ProtectSystem=strict",
@@ -43,16 +44,22 @@ def main():
     assert "text/event-stream" in mcp_http, "MCP HTTP transport needs SSE"
     plugin = read("plugins/fda-claude/.mcp.json")
     assert "mcpServers" in plugin, "Claude plugin needs an MCP config"
-    skill = read("plugins/fda-claude/skills/fda-forward-deployed-agents/SKILL.md")
-    assert "approval" in skill.lower(), "Claude skill must cover approvals"
-    onboarding = read("skills/fda-onboarding-engineer/SKILL.md")
-    assert "Handoff record" in onboarding, "onboarding skill needs a handoff"
-    assert "fda-onboarding-engineer" in read("src/fda/onboarding_skill.py")
+    skill = read("plugins/fda-claude/skills/fda-agent-builder/SKILL.md")
+    assert "fda-agent-builder" in skill, "plugin must ship the meta-skill"
+    assert "FDA_HANDLERS" in skill, "meta-skill must be language-agnostic"
+    builder = read("src/fda/builder_skill.py")
+    assert "BUILDER_SKILL = '''---" in builder, "embedded meta-skill missing"
+    boilerplate = read("docs/boilerplate.md")
+    assert "X-FDA-Tenant" in boilerplate, "boilerplate needs the HTTP contract"
+    assert "X-FDA-Signature" in boilerplate, "boilerplate needs webhook signing"
     assert "# Tutorial" in read("src/fda/tutorial.py"), "embedded tutorial missing"
-    assert (ROOT / "integrations" / "fda-skill.zip").is_file(), "skill upload missing"
+    with __import__("zipfile").ZipFile(ROOT / "integrations" / "fda-skill.zip") as zf:
+        assert zf.namelist() == ["fda-agent-builder/SKILL.md"], \
+            "skill upload must contain only the meta-skill"
 
     for doc in ("docs/deployment.md", "docs/security.md", "docs/integrating.md",
                 "docs/chatgpt_and_claude.md", "docs/onboarding_prompt.md",
+                "docs/builder_prompt.md", "docs/boilerplate.md", "docs/README.md",
                 "docs/tutorial.md", "docs/faq.md"):
         text = read(doc)
         assert len(text) > 500, "%s looks empty" % doc
@@ -60,7 +67,7 @@ def main():
     workflow = read(".github/workflows/ci.yml")
     assert "make all" in workflow, "CI must run make all"
 
-    print("Deployment and integration artifacts checked: 19 files")
+    print("Deployment and integration artifacts checked: 21 files")
     print("ALL CLEAN")
     return 0
 

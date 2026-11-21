@@ -55,6 +55,8 @@ All paths are overridable:
 | `FDA_APPROVER_TOKEN` | empty | Approver token for `approvals serve` |
 | `FDA_API_TOKEN` | empty | Shared bearer token required by `api serve` |
 | `FDA_MCP_TOKEN` | empty | Bearer token for `serve --transport http` (ChatGPT/remote MCP) |
+| `FDA_HANDLERS` | empty | Path to a JSON map of action → webhook endpoint (any language) |
+| `FDA_HANDLER_SECRET` | empty | Secret used to sign FDA → product handler calls |
 | `FDA_ACTOR` | empty | Default actor for SDK/API calls |
 
 ## 3. Trust and supply chain
@@ -154,8 +156,9 @@ Kill switch scopes are `*` (all tenants) or a tenant id. A paused tenant gets a
   `docker run -i --rm` for the stdio server.
 - `docker-compose.yml` runs the approval UI and the JSON API with persistent
   volumes for state, agents, trust and registry. Set `FDA_APPROVER_TOKEN`,
-  `FDA_API_TOKEN` and `FDA_MCP_TOKEN` before `docker compose up`. The `mcp-http`
-  service is the remote MCP endpoint for ChatGPT / remote Claude.
+  `FDA_API_TOKEN`, `FDA_MCP_TOKEN`, `FDA_HANDLERS` and `FDA_HANDLER_SECRET` before
+  `docker compose up`. The `mcp-http` service is the remote MCP endpoint for
+  ChatGPT / remote Claude; handlers let the product stay in any language.
 - `deploy/systemd/fda-approvals.service` is a hardened unit for the approval UI.
   Create `/etc/fda/approvals.env` mode `0600` containing
   `FDA_APPROVER_TOKEN=<long random string>`, then `systemctl enable --now

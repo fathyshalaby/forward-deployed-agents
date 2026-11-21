@@ -1,216 +1,98 @@
 # Forward-deployed agents
 
-A small, general framework for agents that work **inside a customer boundary**,
-using **connectors the customer owns**. It is not tied to onboarding, support or
-IT operations: those are example playbooks you can replace.
+Build an agent that works **inside a customer boundary**, using connectors the
+customer owns. It plans, asks a human for approval, runs, and leaves a
+content-free audit trail. Standard library only; one SQLite file.
 
-The agent plans work, asks a human for purpose-bound approvals, runs through
-granted connectors, and produces a content-free, hash-chained audit trail.
-Python 3 standard library only; durable state lives in one SQLite file.
+## The easy way: give this to Claude Code or Codex
 
-```
-playbooks (JSON)  ->  plan  ->  out-of-band approval  ->  run  ->  audit
-                            \-> deny and stop
-```
-
-## Build an agent, ship it, plug it in
-
-An **agent bundle** is one versioned folder (or one `.fda` archive) with your
-playbooks, connector descriptors and optional AI skill. A builder creates it; a
-user installs it and points their AI client at the MCP server. Ids are
-namespaced, so several independently authored agents can run side by side.
+There is **one meta-skill**. Paste it into Claude Code, Codex, Cursor, or any
+coding agent with this repo and a shell. It asks three questions, reads our
+boilerplate, then builds, wires, deploys and verifies a complete agent in the
+product's own language.
 
 ```sh
-# builder
-python3 -m fda agents init ./my-agent --id acme.my-agent --name "My Agent"
-python3 -m fda agents validate ./my-agent
-python3 -m fda agents build ./my-agent -o dist/acme.my-agent-0.1.0.fda
-
-# user
-python3 -m fda agents install dist/acme.my-agent-0.1.0.fda
-python3 -m fda agents list
-python3 -m fda agents skill acme.my-agent --target opencode
-python3 -m fda serve
+fda skill          # print the meta-skill (same as: fda skill builder, fda meta)
 ```
 
-**New here? Start with the [tutorial](docs/tutorial.md)** — a 45-minute,
-copy-paste walkthrough from install to a signed, approved agent in ChatGPT and
-Claude. Run `fda tutorial` or `make tutorial` to print it from the CLI.
-Common questions are answered in the [FAQ](docs/faq.md).
+Or install the file directly:
 
-See [docs/agent_bundles.md](docs/agent_bundles.md) to author a bundle,
-[docs/connect_an_ai.md](docs/connect_an_ai.md) for generic MCP clients, and
-[docs/chatgpt_and_claude.md](docs/chatgpt_and_claude.md) to use agents from
-**ChatGPT** (remote MCP plugin) or **Claude** (stdio connector + skill). A
-complete example is in
-[examples/bundles/release-watch](examples/bundles/release-watch), with a ready
-archive at `examples/bundles/dist/`.
+- [`skills/fda-agent-builder/SKILL.md`](skills/fda-agent-builder/SKILL.md) — the skill
+- [`docs/builder_prompt.md`](docs/builder_prompt.md) — copy/paste version
+- [`integrations/fda-skill.zip`](integrations/fda-skill.zip) — Claude upload / plugin
 
-## Deploy it
+The product does **not** have to be Python. FDA runs as a small service; the
+product calls its JSON API, and real connector actions are signed webhook
+routes implemented in whatever stack the product uses. See
+[`docs/boilerplate.md`](docs/boilerplate.md) for the complete wire contract.
+
+### What the skill does
+
+1. Asks: product + stack, 1–3 steps, systems touched + who approves writes.
+2. Scaffolds a declarative `fda-agent/v1` bundle — no code, no credentials.
+3. Validates, builds, installs and lists the agent.
+4. Writes `handlers.json` and generates product-side webhook routes.
+5. Starts the JSON API / MCP server and connects Claude or ChatGPT.
+6. Runs one approved play, checks the audit chain, and reports how to stop it.
+
+## Install in 30 seconds
 
 ```sh
 python3 -m pip install .
+fda doctor
+fda agents install examples/bundles/dist/demo.release-watch-1.0.0.fda
+fda agents list
+printf '{"jsonrpc":"2.0","id":1,"method":"tools/list"}\n' | fda serve --no-examples
+```
+
+That last command shows 15 tools. Point an MCP client at `fda serve`, or use the
+meta-skill to generate your own agent instead of the example.
+
+## Talk to the agent
+
+| Client | Command / config |
+|---|---|
+| Claude Desktop / Code | [`integrations/claude_desktop_config.example.json`](integrations/claude_desktop_config.example.json) or [`plugins/fda-claude/`](plugins/fda-claude/) |
+| ChatGPT | `fda serve --transport http --host 0.0.0.0 --port 8000 --token "$FDA_MCP_TOKEN" --no-examples` behind HTTPS, then add `https://<host>/mcp` as a custom MCP server |
+| Any product | `fda api serve --port 8080 --token "$FDA_API_TOKEN"` — JSON HTTP, no Python required |
+
+Details: [`docs/chatgpt_and_claude.md`](docs/chatgpt_and_claude.md).
+
+## Production in one block
+
+```sh
 export FDA_STATE=/var/lib/fda/state.db
 export FDA_AGENTS=/var/lib/fda/agents
-export FDA_APPROVAL_MODE=external        # the model cannot grant its own approvals
-export FDA_TENANT=acme
+export FDA_APPROVAL_MODE=external      # the AI cannot approve its own work
+export FDA_HANDLERS=/etc/fda/handlers.json
 
-fda doctor
 fda approvals serve --token "$FDA_APPROVER_TOKEN"   # separate human process
-fda serve --state "$FDA_STATE" --approval-mode external
+docker compose up -d approvals api mcp-http
+fda ops status && fda ops audit-verify
 ```
 
-Signatures, registry checks, pinning, revocation, a kill switch, tenancy-aware
-audit and container/systemd/Kubernetes artifacts are included. Start with
-[docs/deployment.md](docs/deployment.md) and [docs/security.md](docs/security.md).
+Signing, registry checks, pinning, revocation, kill switch, tenancy and
+container/systemd/Kubernetes files are included. See
+[`docs/deployment.md`](docs/deployment.md) and [`docs/security.md`](docs/security.md).
+
+## Repo map
+
+```
+fda skill              the one meta-skill
+docs/boilerplate.md    the contract the skill follows
+docs/                  longer reference (tutorial, security, integration, ...)
+examples/bundles/      a complete example agent
+src/fda/               runtime, MCP, HTTP API, bundles, state, trust, CLI
+plugins/fda-claude/    Claude connector + the meta-skill
+```
+
+Humans who want the long path can read the
+[45-minute tutorial](docs/tutorial.md) or the [FAQ](docs/faq.md). Everything
+else in `docs/` is reference material, not required reading.
+
+## Check
 
 ```sh
-docker build -t fda .
-docker compose up -d approvals             # human approval UI on 127.0.0.1:8787
-docker compose run --rm fda                # MCP stdio server
-```
-
-For ChatGPT or remote Claude, expose MCP over HTTPS/SSE:
-
-```sh
-fda serve --transport http --host 0.0.0.0 --port 8000 \
-  --token "$FDA_MCP_TOKEN" --no-examples
-```
-
-## Quick start (the framework)
-
-```sh
-make test          # 81 unittest tests
-make tutorial      # print the end-to-end tutorial
-make demo          # scripted end-to-end session
-make scenarios     # 10 scenario matrix across the different agent types
-make check         # docs links and content-free audit
-make check-deploy  # container, systemd and Kubernetes artifacts
-make serve         # MCP stdio server: python3 -m fda serve
-```
-
-In an MCP client, point the server at `python3 -m fda serve` from this
-directory, or `pip install .` and use `fda serve`.
-
-## Integrate it into your own product
-
-The MCP server is one adapter; the same runtime is a Python SDK and a JSON HTTP
-API, so your product can offer agents without an AI client.
-
-```python
-from fda.sdk import Client
-
-client = Client.create(approval_mode="external", tenant="acme", actor="web-app")
-plan = client.plan("onboarding")
-client.grant_approval(plan["steps"][0]["approval_id"], "alice")  # your UI
-result = client.run("onboarding", {"welcome_ticket": plan["steps"][0]["approval_id"]})
-```
-
-```sh
-fda api serve --port 8080 --token "$FDA_API_TOKEN"   # any language via HTTP
-make integration-example                            # runnable product example
-```
-
-See [docs/integrating.md](docs/integrating.md) for the SDK, HTTP endpoints,
-events/webhooks, custom connectors and multi-tenancy. A runnable example is in
-[examples/integrations/product_app.py](examples/integrations/product_app.py).
-
-## Agentic onboarding engineer
-
-Product teams do not have to learn the framework: give their AI the
-**onboarding engineer skill** and it interviews them, designs the agent,
-scaffolds the signed bundle, binds real connectors, sets up approvals and
-deployment, connects ChatGPT/Claude and verifies the run.
-
-```sh
-fda skill onboarding                 # print the copy-paste prompt
-```
-
-The same text is an installable skill at
-[`skills/fda-onboarding-engineer/SKILL.md`](skills/fda-onboarding-engineer/SKILL.md),
-is bundled in [`integrations/fda-skill.zip`](integrations/fda-skill.zip) for
-Claude, and is documented with a copy/paste block in
-[docs/onboarding_prompt.md](docs/onboarding_prompt.md).
-
-## What is included
-
-- **Agent bundles** (`src/fda/bundle.py`, `cli.py`): scaffold, validate, package,
-  sign, install, list, export a skill; namespaced so bundles cannot collide.
-- **Embedding SDK and JSON API** (`src/fda/sdk.py`, `http_api.py`): in-process
-  Python client, HTTP adapter, events, signed webhooks and tenant scoping.
-- **MCP server** (`src/fda/mcp.py`, `mcp_http.py`, `tools.py`): JSON-RPC over
-  stdio and HTTP/SSE, fifteen annotated tools, no runtime dependencies.
-- **Playbook engine** (`src/fda/plays.py`): load JSON playbooks, plan, gate and
-  run them. Unknown playbooks, steps, connectors or scopes fail closed.
-- **Privacy gate** (`src/fda/privacy.py`): four data classes, read/write scopes,
-  single-use approvals bound to actor, playbook hash and arguments.
-- **Durable state** (`src/fda/store.py`): SQLite runs, approvals, hash-chained
-  audit, revocations, pins and a global/per-tenant kill switch.
-- **Trust and supply chain** (`src/fda/security.py`): signed bundles, publisher
-  keyring, local or read-only HTTP registry, content pinning.
-- **Out-of-band approvals** (`src/fda/approval_ui.py`): token-protected HTTP UI
-  and CLI; model-side grants are disabled in `external` mode.
-- **User-owned connectors** (`src/fda/connectors.py`): descriptors expose only
-  id, scopes and actions. Credentials never reach the agent. Real adapters are
-  registered operator-side per action.
-- **Example playbooks** (`examples/playbooks/`): onboarding, support-to-fix,
-  access review and a content step that demonstrates denial.
-- **Example bundle** (`examples/bundles/release-watch/`): a third-party-style
-  agent with its own connector, write gate and AI skill.
-- **Agent skill** (`skill/SKILL.md`): framework operating rules and a template
-  for new playbooks.
-- **Scenario matrix** (`scripts/scenarios.py`): 10 runs covering approval,
-  no-approval, missing scope, wrong-purpose and replayed approvals.
-- **Docs** (`docs/`): architecture, authoring, bundles, connecting an AI,
-  integration, privacy, tools, deployment, security, rollout and a
-  [deep dive](docs/deep_dive.md).
-
-## Your own agent without bundles
-
-```sh
-mkdir -p my-playbooks
-cp examples/playbooks/onboarding.json my-playbooks/
-FDA_PLAYBOOKS=/absolute/path/to/my-playbooks python3 -m fda serve --single
-```
-
-Add connector descriptors in your own JSON file and set `FDA_CONNECTORS`.
-Bundles are the recommended route when you intend to hand an agent to someone
-else; see [docs/playbook_authoring.md](docs/playbook_authoring.md) for the step
-schema.
-
-## Safety model
-
-| Rule | Enforcement |
-|---|---|
-| Smallest data class | `needs` declared per step; `aggregate`/`metadata` default |
-| Writes need a human | `write: true` forces an approval gate |
-| Content is exceptional | `content` needs purpose, approval and scope |
-| No credential exposure | connector public view excludes secrets and endpoints |
-| No content in audit | free text hashed; emails and tokens redacted |
-| Fail closed | first denial stops the run |
-| Bundles carry no code | declarative JSON/Markdown only; safe extraction on install |
-| No bundle id collisions | all ids namespaced with `<bundle id>::` |
-| Trusted publishers only | HMAC signatures, trust store, optional required signatures |
-| No silent upgrades | registry hash check and content pinning |
-| Emergency stop | global or per-tenant kill switch checked before every run |
-| Attributable decisions | approvals bound to actor, purpose and playbook hash |
-
-See [docs/privacy_model.md](docs/privacy_model.md) and
-[docs/security.md](docs/security.md). Connectors are simulated until an
-operator registers real handlers; the audit chain detects edits in the database,
-so production should also ship entries to a write-only sink.
-
-## Repo layout
-
-```
-src/fda/           engine, MCP server, bundles, state, trust, approvals, CLI
-examples/          connector descriptors, example playbooks, example bundle
-skill/SKILL.md     reusable framework skill
-docs/              architecture, authoring, bundles, connect-an-AI, privacy, tools,
-                   deployment, security, rollout
-tests/             standard-library unittest suite (67 tests)
-scripts/           validation and scenario matrix
-examples/integrations/  runnable product-backend example
-deploy/            systemd and Kubernetes manifests
-Dockerfile         non-root container image
+make all             # tests, scenarios, docs and deploy checks
+make tutorial        # optional long-form walkthrough
 ```
