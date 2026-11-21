@@ -14,8 +14,8 @@ This installs `fda-agent-builder` into `~/.claude/skills/`. Change the location
 with `--dir`, or install from the zip with `--source zip`:
 
 ```sh
-python3 -c "$(curl -fsSL https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/scripts/install_skill.py)" -- --dir "$HOME/.codex/skills"
-python3 -c "$(curl -fsSL https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/scripts/install_skill.py)" -- --source zip
+python3 -c "$(curl -fsSL https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/scripts/install_skill.py)" --dir "$HOME/.codex/skills"
+python3 -c "$(curl -fsSL https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/scripts/install_skill.py)" --source zip
 ```
 
 From a checkout: `make install-skill` or `python3 scripts/install_skill.py`.
