@@ -104,3 +104,6 @@ without a run id. Treat those as stop conditions.
 
 MCP protocol traffic is one JSON message per line on stdout; diagnostics go to
 stderr. That is why the stdio server composes cleanly with clients.
+
+For ChatGPT and Claude-specific setup — including the remote HTTP/SSE transport
+and the bundled skill — see [chatgpt_and_claude.md](chatgpt_and_claude.md).

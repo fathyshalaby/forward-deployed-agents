@@ -39,14 +39,23 @@ def main():
     assert "FDA_API_TOKEN" in api_k8s, "k8s API manifest needs a token"
     assert "runAsNonRoot: true" in api_k8s, "k8s API must run as non-root"
 
-    for doc in ("docs/deployment.md", "docs/security.md", "docs/integrating.md"):
+    mcp_http = read("src/fda/mcp_http.py")
+    assert "text/event-stream" in mcp_http, "MCP HTTP transport needs SSE"
+    plugin = read("plugins/fda-claude/.mcp.json")
+    assert "mcpServers" in plugin, "Claude plugin needs an MCP config"
+    skill = read("plugins/fda-claude/skills/fda-forward-deployed-agents/SKILL.md")
+    assert "approval" in skill.lower(), "Claude skill must cover approvals"
+    assert (ROOT / "integrations" / "fda-skill.zip").is_file(), "skill upload missing"
+
+    for doc in ("docs/deployment.md", "docs/security.md", "docs/integrating.md",
+                "docs/chatgpt_and_claude.md"):
         text = read(doc)
         assert len(text) > 500, "%s looks empty" % doc
 
     workflow = read(".github/workflows/ci.yml")
     assert "make all" in workflow, "CI must run make all"
 
-    print("Deployment and integration artifacts checked: 8 files")
+    print("Deployment and integration artifacts checked: 13 files")
     print("ALL CLEAN")
     return 0
 

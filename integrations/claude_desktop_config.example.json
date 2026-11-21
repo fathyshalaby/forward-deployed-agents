@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "fda": {
+      "command": "/usr/local/bin/fda",
+      "args": ["serve", "--no-examples"],
+      "env": {
+        "FDA_STATE": "/Users/YOU/.fda/state.db",
+        "FDA_AGENTS": "/Users/YOU/.fda/agents",
+        "FDA_APPROVAL_MODE": "external"
+      }
+    }
+  }
+}

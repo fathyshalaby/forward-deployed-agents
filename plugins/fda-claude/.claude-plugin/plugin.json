@@ -1,0 +1,9 @@
+{
+  "name": "fda-forward-deployed-agents",
+  "description": "Governed, bundle-based agents with durable runs, human approvals and audit. Adds the FDA MCP connector and the usage skill.",
+  "version": "0.5.0",
+  "author": {
+    "name": "fathyshalaby"
+  },
+  "repository": "https://github.com/fathyshalaby/forward-deployed-agents"
+}

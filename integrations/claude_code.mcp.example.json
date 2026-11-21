@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "fda": {
+      "type": "stdio",
+      "command": "fda",
+      "args": ["serve", "--no-examples"],
+      "env": {
+        "FDA_APPROVAL_MODE": "external"
+      }
+    }
+  }
+}

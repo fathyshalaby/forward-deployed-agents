@@ -6,7 +6,7 @@ from .connectors import ConnectorError
 from .plays import PlayError
 from .privacy import PrivacyError
 
-TOOL_VERSION = "0.3.0"
+TOOL_VERSION = "0.4.0"
 
 
 class ToolError(Exception):
@@ -240,11 +240,28 @@ TOOLS: List[dict] = [
 ]
 
 
+READ_ONLY_TOOLS = {
+    "connectors.list", "plays.list", "play.describe", "play.status",
+    "play.privacy_check", "approval.status", "ops.status", "audit.explain",
+    "agents.list", "agent.describe", "agent.skill",
+}
+
+DESTRUCTIVE_TOOLS = {"play.run", "approval.grant"}
+
+
 def tool_catalog() -> List[dict]:
-    return [
-        {key: value for key, value in tool.items() if key != "handler"}
-        for tool in TOOLS
-    ]
+    catalog = []
+    for tool in TOOLS:
+        item = {key: value for key, value in tool.items() if key != "handler"}
+        # MCP annotations: clients use these to decide whether to ask for
+        # confirmation (ChatGPT treats anything without readOnlyHint as a write).
+        item["annotations"] = {
+            "readOnlyHint": tool["name"] in READ_ONLY_TOOLS,
+            "destructiveHint": tool["name"] in DESTRUCTIVE_TOOLS,
+            "openWorldHint": False,
+        }
+        catalog.append(item)
+    return catalog
 
 
 def call_tool(runtime, name: str, arguments: dict) -> dict:

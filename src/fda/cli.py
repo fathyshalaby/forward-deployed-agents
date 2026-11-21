@@ -16,6 +16,7 @@ from .bundle import (
 )
 from .http_api import serve as serve_api
 from .mcp import stdio_loop
+from .mcp_http import serve as serve_mcp_http
 from .runtime import (
     default_approval_mode, default_audit_path, default_state_path, examples_present,
     load_agents_runtime, load_runtime,
@@ -124,6 +125,12 @@ def cmd_serve(args) -> int:
         )
     if args.approval_mode:
         runtime.approval_mode = args.approval_mode
+    if args.transport == "http":
+        token = args.token or os.environ.get("FDA_MCP_TOKEN", "")
+        print("FDA MCP server on http://%s:%d/mcp (SSE + JSON-RPC)" %
+              (args.host, args.port))
+        serve_mcp_http(runtime, args.host, args.port, token, args.allow_origin)
+        return 0
     return stdio_loop(runtime)
 
 
@@ -465,6 +472,13 @@ def build_parser() -> argparse.ArgumentParser:
     serve.add_argument("--tenant")
     serve.add_argument("--actor")
     serve.add_argument("--single", action="store_true")
+    serve.add_argument("--transport", choices=("stdio", "http"), default="stdio",
+                       help="stdio for local clients; http for ChatGPT/remote MCP")
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8000)
+    serve.add_argument("--token", default=os.environ.get("FDA_MCP_TOKEN", ""),
+                       help="bearer token for HTTP transport (FDA_MCP_TOKEN)")
+    serve.add_argument("--allow-origin", default="")
     serve.set_defaults(func=cmd_serve)
 
     doctor = sub.add_parser("doctor", help="show deployment configuration")

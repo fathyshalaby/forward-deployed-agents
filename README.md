@@ -33,9 +33,11 @@ python3 -m fda agents skill acme.my-agent --target opencode
 python3 -m fda serve
 ```
 
-See [docs/agent_bundles.md](docs/agent_bundles.md) to author a bundle and
-[docs/connect_an_ai.md](docs/connect_an_ai.md) to connect OpenCode, Claude or
-any MCP client. A complete example is in
+See [docs/agent_bundles.md](docs/agent_bundles.md) to author a bundle,
+[docs/connect_an_ai.md](docs/connect_an_ai.md) for generic MCP clients, and
+[docs/chatgpt_and_claude.md](docs/chatgpt_and_claude.md) to use agents from
+**ChatGPT** (remote MCP plugin) or **Claude** (stdio connector + skill). A
+complete example is in
 [examples/bundles/release-watch](examples/bundles/release-watch), with a ready
 archive at `examples/bundles/dist/`.
 
@@ -63,10 +65,17 @@ docker compose up -d approvals             # human approval UI on 127.0.0.1:8787
 docker compose run --rm fda                # MCP stdio server
 ```
 
+For ChatGPT or remote Claude, expose MCP over HTTPS/SSE:
+
+```sh
+fda serve --transport http --host 0.0.0.0 --port 8000 \
+  --token "$FDA_MCP_TOKEN" --no-examples
+```
+
 ## Quick start (the framework)
 
 ```sh
-make test          # 55 unittest tests
+make test          # 72 unittest tests
 make demo          # scripted end-to-end session
 make scenarios     # 10 scenario matrix across the different agent types
 make check         # docs links and content-free audit
@@ -106,8 +115,8 @@ events/webhooks, custom connectors and multi-tenancy. A runnable example is in
   sign, install, list, export a skill; namespaced so bundles cannot collide.
 - **Embedding SDK and JSON API** (`src/fda/sdk.py`, `http_api.py`): in-process
   Python client, HTTP adapter, events, signed webhooks and tenant scoping.
-- **MCP server** (`src/fda/mcp.py`, `tools.py`): JSON-RPC over stdio, fifteen
-  tools, no runtime dependencies.
+- **MCP server** (`src/fda/mcp.py`, `mcp_http.py`, `tools.py`): JSON-RPC over
+  stdio and HTTP/SSE, fifteen annotated tools, no runtime dependencies.
 - **Playbook engine** (`src/fda/plays.py`): load JSON playbooks, plan, gate and
   run them. Unknown playbooks, steps, connectors or scopes fail closed.
 - **Privacy gate** (`src/fda/privacy.py`): four data classes, read/write scopes,
