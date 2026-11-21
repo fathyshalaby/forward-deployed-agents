@@ -46,12 +46,15 @@ def main():
     assert "mcpServers" in plugin, "Claude plugin needs an MCP config"
     skill = read("plugins/fda-claude/skills/fda-agent-builder/SKILL.md")
     assert "fda-agent-builder" in skill, "plugin must ship the meta-skill"
-    assert "FDA_HANDLERS" in skill, "meta-skill must be language-agnostic"
+    assert "embed" in skill.lower() and "mcp" in skill.lower(), \
+        "meta-skill must embed into product MCP"
     builder = read("src/fda/builder_skill.py")
     assert "BUILDER_SKILL = '''---" in builder, "embedded meta-skill missing"
+    assert "docs/embed_mcp.md" in builder, "meta-skill must point at embed docs"
     boilerplate = read("docs/boilerplate.md")
     assert "X-FDA-Tenant" in boilerplate, "boilerplate needs the HTTP contract"
     assert "X-FDA-Signature" in boilerplate, "boilerplate needs webhook signing"
+    assert "embed_mcp.md" in boilerplate, "boilerplate must prefer embed path"
     assert "# Tutorial" in read("src/fda/tutorial.py"), "embedded tutorial missing"
     with __import__("zipfile").ZipFile(ROOT / "integrations" / "fda-skill.zip") as zf:
         assert zf.namelist() == ["fda-agent-builder/SKILL.md"], \
@@ -63,7 +66,8 @@ def main():
     for doc in ("docs/deployment.md", "docs/security.md", "docs/integrating.md",
                 "docs/chatgpt_and_claude.md",
                 "docs/builder_prompt.md", "docs/boilerplate.md", "docs/install.md",
-                "docs/tutorial.md", "docs/faq.md", "docs/artifacts.md"):
+                "docs/tutorial.md", "docs/faq.md", "docs/artifacts.md",
+                "docs/embed_mcp.md"):
         text = read(doc)
         assert len(text) > 500, "%s looks empty" % doc
     assert len(read("docs/README.md")) > 200, "docs/README.md looks empty"
@@ -73,6 +77,10 @@ def main():
             "integration-health-board.md").is_file(), \
         "Specky artifact recipe missing"
     assert "artifacts.list" in read("src/fda/tools.py"), "MCP needs artifacts.list"
+    assert (ROOT / "examples/embed/typescript/src/server.ts").is_file(), \
+        "TypeScript embed scaffold missing"
+    assert (ROOT / "examples/embed/typescript/src/control-plane.ts").is_file(), \
+        "embed control plane missing"
 
     workflow = read(".github/workflows/ci.yml")
     assert "make all" in workflow, "CI must run make all"

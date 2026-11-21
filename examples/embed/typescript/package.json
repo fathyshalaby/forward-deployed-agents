@@ -1,0 +1,19 @@
+{
+  "name": "fda-embed-typescript",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimal product-owned MCP with forward-deployed agent tools",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "npm run build && node dist/server.js",
+    "start:http": "npm run build && node dist/server.js --http"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}

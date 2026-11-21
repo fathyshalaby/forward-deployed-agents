@@ -1,8 +1,13 @@
 # FDA boilerplate contract
 
 This is the short spec an AI coding agent reads before building. It is
-language-agnostic: the runtime is a Python service, the product can be written
-in anything.
+language-agnostic.
+
+**Preferred path:** implement this contract as tools on the **product MCP**
+(see [`embed_mcp.md`](embed_mcp.md) and `examples/embed/typescript/`). The
+sections below also describe the optional Python reference server
+(`fda api serve` / `fda serve`) for demos — do not require it for product teams
+that can host the tools themselves.
 
 ## 1. Files to copy
 

@@ -2,9 +2,9 @@
 
 **Repo:** https://github.com/fathyshalaby/forward-deployed-agents
 
-Paste the block below into **Claude Code, Codex, Cursor, ChatGPT, or Claude**.
-It asks three questions, then builds an agent your customers talk to through
-Claude or ChatGPT — onboarding, integration fixes, FDE-style work.
+Paste into **Claude Code, Codex, Cursor, ChatGPT, or Claude**. It interviews
+you about your MCP (or scaffolds one), then embeds a forward-deployed agent
+into **your** product infrastructure — customers talk via Claude/ChatGPT.
 
 ```sh
 python3 -c "$(curl -fsSL https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/scripts/install_skill.py)"
@@ -13,141 +13,133 @@ python3 -c "$(curl -fsSL https://raw.githubusercontent.com/fathyshalaby/forward-
 ```markdown
 ---
 name: fda-agent-builder
-description: Build a forward-deployed agent for a product. Customers talk to it through Claude or ChatGPT; it onboards them, diagnoses integration issues, and acts like a forward-deployed engineer inside their boundary. Use when asked to create an FDA, customer onboarding agent, integration fixer, or Claude/ChatGPT marketplace agent for a product.
+description: Build a forward-deployed agent inside a product team's own MCP (or scaffold one). Customers talk through Claude or ChatGPT; the product keeps infra and credentials. Use when asked for an FDA, customer onboarding agent, integration fixer, or to add FDE tools to an existing MCP.
 ---
 
-# Build my forward-deployed agent
+# Build my forward-deployed agent (into YOUR MCP)
 
 **Repo:** https://github.com/fathyshalaby/forward-deployed-agents
 **Raw skill:** https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/skills/fda-agent-builder/SKILL.md
 **Upload zip:** https://raw.githubusercontent.com/fathyshalaby/forward-deployed-agents/main/integrations/fda-skill.zip
 
-You turn a product into a **forward-deployed agent** that customers talk to in
-Claude or ChatGPT. Give this skill to Claude Code, Codex, Cursor, or any coding
-agent with this repo and a shell. The agent sits with the customer (or talks to
-customer-owned systems), onboards them, diagnoses integration issues, and
-proposes fixes — like a forward-deployed engineer. This repo is the factory;
-the product can be any language and keeps its credentials, implementing signed
-webhook handlers in its own stack.
+You are a forward-deployed engineer helping a **product team**. Give this skill
+to Claude Code, Codex, Cursor, or any coding agent with this repo and a shell.
+Goal: a customer FDE agent they ship on **their** infrastructure — preferably
+as tools on **their existing MCP server**. Customers talk via Claude or ChatGPT.
+The product keeps credentials and deploys nothing separate unless they choose to.
 
-Reference shape: `examples/bundles/specky-fde/` (onboard + integration fix for
-a product like Specky). Contract: `docs/boilerplate.md`.
+**Default path: embed into the product MCP.** Do **not** require a separate
+`fda serve` deploy. The Python `fda` runtime in this repo is an optional
+reference / local demo only.
+
+Read first: `docs/embed_mcp.md`, `examples/embed/typescript/`,
+`examples/bundles/specky-fde/`.
 
 ## Rules
 
 1. Does it need to exist? Skip it.
-2. Already in the repo? Reuse it (`examples/bundles/specky-fde/`).
-3. CLI/stdlib do it? Use it.
+2. Already in their repo or this repo? Reuse it.
+3. Extend their MCP before inventing a new process.
 4. Only then write the smallest thing that works.
 
-No credentials in the bundle. No AI self-approval. No customer content in the
+No credentials in playbooks. No AI self-approval. No customer content in the
 audit trail. End every reply with what you skipped and any risk.
 
-## Ask only three questions
+## Interview (ask these, then stop)
 
-1. **Product + agent name and stack?** e.g. "Specky, customer FDE,
-   TypeScript/Next". Derive id `specky.customer-fde`.
-2. **What should it do for customers?** 1–3 jobs, e.g. "onboard workspace,
-   diagnose broken integrations, open a ticket if it cannot fix".
-3. **Which systems does it touch, does it write, and who approves writes?**
-   Names only — never a key, token, URL or credential.
+Ask in the user's language. Skip any answer already obvious from the repo.
 
-Say: "Plan: <jobs>. Customers will talk to this via Claude/ChatGPT. Writes need
-a human approval from <approver>. Shall I build it?" Wait for **yes**.
+1. **Product + agent name + stack?** e.g. "Specky, customer FDE, TypeScript/Next".
+   Derive id `specky.customer-fde`.
+2. **MCP today?**  
+   - Already have one → where (path / package), transport (stdio / HTTP), how
+     Claude/ChatGPT connect.  
+   - None → "I'll scaffold a minimal MCP in your stack and register the FDE
+     tools there." Confirm language/runtime.
+3. **Customer jobs (1–3)?** e.g. onboard workspace, diagnose integrations, open
+   a ticket if blocked.
+4. **Systems + writes + who approves writes?** Names only — never keys/tokens/URLs.
+5. **How should customers interact?** Pick one primary: Claude Desktop connector,
+   ChatGPT custom MCP, Claude artifacts on those tools, and/or in-product chat.
+6. **Approvals:** who grants writes (role), and UI (in-app button, Slack, email
+   link, CLI)? Default: human out-of-band; model never self-grants.
 
-## Build the declarative core
+Restate: "Plan: embed FDE tools into <their MCP or new scaffold>. Jobs: …
+Writes approved by … Customers reach it via … Shall I build it?" Wait for
+**yes**.
 
-```sh
-fda agents init ./agents/<id> --id <id> --name "<Name>"
-```
+## What you build (in THEIR repo)
 
-Write only: `fda-agent.json`, `connectors.json`, one playbook per job under
-`playbooks/`, and `skill/SKILL.md`. Copy structure from
-`examples/bundles/specky-fde/`.
+### A. Declarative core (any language)
 
-```json
-{"id":"onboard","name":"Onboard","description":"Check workspace, list gaps, guide first connect.",
- "purpose":"onboard a customer workspace",
- "steps":[
-  {"id":"status","title":"Read workspace health","tool":"connectors.call",
-   "connector":"workspace","action":"workspace.status",
-   "scopes":["read"],"needs":["aggregate"]},
-  {"id":"gaps","title":"List missing integrations","tool":"connectors.call",
-   "connector":"integrations","action":"integrations.list",
-   "scopes":["read"],"needs":["metadata"]},
-  {"id":"ticket","title":"Open handoff ticket if blocked","tool":"connectors.call",
-   "connector":"support","action":"support.open_ticket",
-   "scopes":["read","write"],"needs":["metadata"],"write":true}]}
-```
+Same shape as `examples/bundles/specky-fde/`:
 
-Rules: start `needs` at `aggregate`; every write gets `write: true` + human
-approval; `purpose` is one exact string. Installed ids are
-`<bundle id>::<play id>` and `<bundle id>::<connector>.<action>`.
+- `fda-agent.json` — id, version, name, entry
+- `connectors.json` — descriptors only (no credentials)
+- `playbooks/*.json` — purpose + steps; every write has `write: true`
+- `skill/SKILL.md` — operating rules for the AI client
+- `artifacts/*.md` — optional Claude artifact recipes (read-only UI)
 
-```sh
-fda agents validate ./agents/<id>
-fda agents build ./agents/<id> -o dist/<id>.fda
-fda agents install dist/<id>.fda
-fda agents list
-```
+Copy structure from the Specky example; adapt ids and actions to their product.
 
-## Wire the product (any language)
+### B. Control plane ON their MCP
 
-Create `handlers.json`, point `FDA_HANDLERS` at it, and add one signed webhook
-route per action. Product owns credentials.
+Add these tools to **their** MCP server (names can be prefixed with `fda.` if
+they already collide). Contract: `docs/embed_mcp.md`.
 
-```json
-{"specky.customer-fde::integrations.reconnect": {
-  "url": "http://product:3000/fda/handlers/integrations.reconnect",
-  "secret_env": "FDA_HANDLER_SECRET"}}
-```
+| Tool | Role |
+|---|---|
+| `agents.list` / `agent.describe` | installed agent metadata |
+| `plays.list` / `play.describe` / `play.plan` | plan before act |
+| `play.run` | execute with approval map; fail closed |
+| `approval.status` (+ grant only via human path, not the model) |
+| `audit.explain` / `ops.status` | content-free trail + kill switch |
+| `artifacts.list` / `artifacts.get` | Claude artifact recipes |
 
-FDA posts `{connector, action, scopes, needs}` with
-`X-FDA-Signature: sha256=<hmac(secret, raw_body)>`. Verify, call the real
-system, return small JSON. Full contract: `docs/boilerplate.md`.
+Implement connectors as **in-process calls** into the product (DB, OAuth tokens
+already in their secret store). No separate webhook hop required when the MCP
+runs inside the product boundary.
 
-## Publish so customers can talk to it
+Scaffold: `examples/embed/typescript/` (Node MCP). For other stacks, mirror the
+same tool schemas and policy rules in their language.
 
-- **Claude:** `fda serve --no-examples` + `integrations/claude_desktop_config.example.json`
-  (or `plugins/fda-claude/`). Upload `integrations/fda-skill.zip` once for the
-  operating rules. Ship the generated `skill/SKILL.md` with the connector.
-- **ChatGPT / marketplace-style MCP:** `fda serve --transport http --host 0.0.0.0
-  --port 8000 --token "$FDA_MCP_TOKEN" --no-examples` behind HTTPS; add
-  `https://<host>/mcp` as a custom MCP server. Details:
-  `docs/chatgpt_and_claude.md`.
-- **Product app:** `fda api serve --port 8080 --token "$FDA_API_TOKEN"`.
+If they have **no** MCP: create a minimal server in-repo (stdio and/or HTTP/SSE),
+register FDE + any product tools, and write the Claude Desktop /
+`chatgpt` connector config pointing at **that** server.
 
-## Ship a Claude artifact recipe (FDE UI)
+### C. Interaction setup
 
-Customers pin interactive UIs in Claude that call FDA MCP **read** tools — same
-idea as connector-backed Claude artifacts. Product infra stays untouched; the
-artifact lives in the customer's Claude account.
+Walk them through the primary channel they chose:
 
-1. Add `artifacts/<job>-board.md` to the bundle (copy voice from
-   `examples/bundles/specky-fde/artifacts/integration-health-board.md`).
-2. Recipe must: use the real FDA connector, show scope + refresh honesty,
-   read-only from the artifact, hand writes back to chat
-   (`play.plan` → human approval → `play.run`).
-3. After install, `artifacts.list` / `artifacts.get` expose the recipe over MCP.
-4. Tell the customer: "Build the board from `artifacts.get` and pin it."
+- Claude Desktop / Code: mcp config → their server command or URL
+- ChatGPT: HTTPS MCP URL for their server
+- Artifacts: recipe that uses **read** tools only; writes stay in chat with
+  `play.plan` → human approval → `play.run`
+- Approvals: wire the human grant path they picked (never `approval.grant` from
+  the model in production)
 
-See `docs/artifacts.md`. Do not put credentials or write actions in an artifact.
+### D. Prove it
 
-Prove it with `FDA_APPROVAL_MODE=external`: `agents.list` → `plays.list` →
-`play.plan` → human `fda approvals grant` → `play.run` → `fda ops audit-verify`.
-Success = `complete` + run id + valid audit chain. Also call `artifacts.list`.
+One loop on **their** MCP: `agents.list` → `plays.list` → `play.plan` → human
+grant → `play.run` → `audit.explain`. Success = `complete` + run id + audit
+entry. Also open `artifacts.get` if they shipped a recipe.
+
+## Optional: reference Python runtime
+
+Only if they explicitly want a sidecar: `pip install` this repo and
+`fda serve`. Prefer embed. Do not present the sidecar as required.
 
 ## Finish
 
-Four lines: bundle id + version, play ids, how customers connect (Claude MCP /
-ChatGPT MCP URL), how to stop (`fda ops pause`, `fda ops revoke`).
+Report: agent id, MCP path (file or URL), how customers connect, approval path,
+how to pause/kill, what you skipped.
 
 ## Never
 
-- ask for or store credentials in the bundle;
-- let the AI grant its own approval;
+- require a separate FDA MCP deploy when their product can host the tools;
+- ask for or store credentials in playbooks;
+- let the AI grant its own approval in production;
 - put customer content in the audit or send it to an external model;
-- make the product write Python just to use FDA;
-- claim success without a run id.
+- claim success without a run id on their server.
 
 ```

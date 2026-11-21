@@ -22,7 +22,7 @@ class SkillAndDocsTests(unittest.TestCase):
     def test_docs_exist(self):
         for name in ("chatgpt_and_claude", "builder_prompt", "boilerplate",
                      "install", "tutorial", "faq", "deployment", "security",
-                     "integrating", "artifacts"):
+                     "integrating", "artifacts", "embed_mcp"):
             self.assertTrue((REPO_ROOT / "docs" / ("%s.md" % name)).exists())
         for gone in ("architecture", "playbook_authoring", "privacy_model",
                      "mcp_tools", "rollout", "from_enron_case", "agent_bundles",

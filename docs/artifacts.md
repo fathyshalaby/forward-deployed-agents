@@ -1,21 +1,20 @@
 # Claude artifacts as an FDE tool
 
-Your customers talk to the FDA through Claude or ChatGPT. **Artifacts** are the
-custom UI layer on top: interactive boards that call your FDA MCP **read**
-tools, the same pattern as connector-backed Claude artifacts (pipeline boards,
-health dashboards, etc.).
+Your customers talk through Claude or ChatGPT connected to **your product MCP**.
+**Artifacts** are the custom UI layer on top: interactive boards that call your
+MCP **read** tools (same idea as connector-backed Claude artifacts).
 
 ## Who owns what
 
 | Layer | Who touches it | Evolves how |
 |---|---|---|
-| FDA runtime + approvals + audit | Product / ops | Rare; versioned deploys |
-| Agent bundle (plays, connectors) | Product via the meta-skill | Rebuild + reinstall |
-| Claude artifact recipes | Shipped in `artifacts/*.md` | Edit recipe; customer rebuilds UI in Claude |
-| Customer's pinned artifact | Customer | Iterates in Claude; their own MCP connection |
+| Product MCP + FDE tools | Product | Skill embeds / scaffolds; you deploy as usual |
+| Playbooks + connectors | Product via the meta-skill | Edit JSON; redeploy MCP |
+| Claude artifact recipes | `artifacts/*.md` in the agent | Edit recipe; customer rebuilds UI in Claude |
+| Customer's pinned artifact | Customer | Iterates in Claude on *their* connection to your MCP |
 
-Customers never touch your infra. The skill and recipes evolve; the control
-plane stays put.
+No separate FDA server required. Customers never run your control plane as a
+sidecar unless you choose the optional Python reference.
 
 ## Hard rule (Claude)
 
