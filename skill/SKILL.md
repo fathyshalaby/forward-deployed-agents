@@ -104,7 +104,7 @@ python3 -m fda agents build ./my-agent -o dist/my-agent.fda
 The recipient installs it with `python3 -m fda agents install dist/my-agent.fda`
 and can export the same rules as a client skill with
 `python3 -m fda agents skill acme.my-agent --target opencode`. See
-`docs/agent_bundles.md` for the manifest format and safety checks. For a
+`docs/boilerplate.md` for the manifest format and safety checks. For a
 customer deployment, sign the archive, publish and pin it, enable external
 approvals and rehearse the kill switch; see `docs/deployment.md`.
 

@@ -8,9 +8,10 @@ runtime directly. The SDK is synchronous and standard-library only.
     client = Client.create(tenant="acme", actor="app")
     client.on("approval.requested", push_to_your_ui)
 
-    plan = client.plan("release_watch")
+    plan = client.plan("specky.customer-fde::onboard")
     # your UI grants plan["steps"][...]["approval_id"]
-    result = client.run("release_watch", approvals={"notify": approval_id})
+    result = client.run("specky.customer-fde::onboard",
+                        approvals={"handoff": approval_id})
 
 Nothing here assumes an AI client: the product decides when to plan and run.
 """

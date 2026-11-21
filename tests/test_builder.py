@@ -64,9 +64,10 @@ class BuilderSkillTests(unittest.TestCase):
     def test_readme_leads_with_the_meta_skill(self):
         text = (ROOT / "README.md").read_text()
         lowered = text.lower()
-        self.assertLess(lowered.index("give this to claude code or codex"),
-                        lowered.index("production in one block"))
+        self.assertLess(lowered.index("start here: run the skill"),
+                        lowered.index("production sketch"))
         self.assertIn("fda skill", text)
+        self.assertIn("specky-fde", text)
 
 
 if __name__ == "__main__":

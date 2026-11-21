@@ -8,10 +8,10 @@ in anything.
 
 | Path | Purpose |
 |---|---|
-| `examples/bundles/release-watch/` | complete bundle: manifest, connectors, playbook, skill |
+| `examples/bundles/specky-fde/` | flagship bundle: onboard + integration fix |
 | `integrations/claude_desktop_config.example.json` | local stdio MCP connector |
 | `integrations/claude_code.mcp.example.json` | project `.mcp.json` for Claude Code |
-| `docs/chatgpt_and_claude.md` | remote MCP plugin setup |
+| `docs/chatgpt_and_claude.md` | how customers talk via Claude / ChatGPT |
 
 A bundle is `fda-agent/v1`: declarative JSON + Markdown only. No executable
 Python, credentials, endpoints, symlinks, traversal or oversized files.
