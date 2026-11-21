@@ -117,9 +117,25 @@ system, return small JSON. Full contract: `docs/boilerplate.md`.
   `docs/chatgpt_and_claude.md`.
 - **Product app:** `fda api serve --port 8080 --token "$FDA_API_TOKEN"`.
 
+## Ship a Claude artifact recipe (FDE UI)
+
+Customers pin interactive UIs in Claude that call FDA MCP **read** tools — same
+idea as connector-backed Claude artifacts. Product infra stays untouched; the
+artifact lives in the customer's Claude account.
+
+1. Add `artifacts/<job>-board.md` to the bundle (copy voice from
+   `examples/bundles/specky-fde/artifacts/integration-health-board.md`).
+2. Recipe must: use the real FDA connector, show scope + refresh honesty,
+   read-only from the artifact, hand writes back to chat
+   (`play.plan` → human approval → `play.run`).
+3. After install, `artifacts.list` / `artifacts.get` expose the recipe over MCP.
+4. Tell the customer: "Build the board from `artifacts.get` and pin it."
+
+See `docs/artifacts.md`. Do not put credentials or write actions in an artifact.
+
 Prove it with `FDA_APPROVAL_MODE=external`: `agents.list` → `plays.list` →
 `play.plan` → human `fda approvals grant` → `play.run` → `fda ops audit-verify`.
-Success = `complete` + run id + valid audit chain.
+Success = `complete` + run id + valid audit chain. Also call `artifacts.list`.
 
 ## Finish
 

@@ -44,9 +44,11 @@ Claude / ChatGPT MCP.
 2. Product-side webhook stubs in your stack (no Python required in the product).
 3. An MCP / JSON API surface so Claude, ChatGPT, or your app can drive it.
 4. External human approvals + content-free audit trail.
+5. Claude **artifact recipes** (`artifacts/*.md`) so customers pin a custom UI
+   on your MCP — product infra stays untouched; see [`docs/artifacts.md`](docs/artifacts.md).
 
 Flagship example: [`examples/bundles/specky-fde/`](examples/bundles/specky-fde/)
-— onboard + integration fix for a product like Specky.
+— onboard + integration fix + Integration Health Board recipe.
 
 ## Try the example in 30 seconds
 

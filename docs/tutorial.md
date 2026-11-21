@@ -41,7 +41,7 @@ fda agents list
 printf '{"jsonrpc":"2.0","id":1,"method":"tools/list"}\n' | fda serve --no-examples
 ```
 
-The last command prints 15 tools. Try `agents.list` and
+The last command prints 17 tools. Try `agents.list`, `artifacts.list` and
 `play.describe` with `{"play_id":"specky.customer-fde::onboard"}` through
 your AI client (step 7) before writing your own bundle.
 

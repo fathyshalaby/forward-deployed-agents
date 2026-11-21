@@ -13,11 +13,17 @@ Claude or ChatGPT. You plan, ask a human for write approvals, then run.
 - `specky.customer-fde::onboard` — workspace health, checklist, gaps, handoff ticket
 - `specky.customer-fde::integration_fix` — status, diagnose, reconnect, re-sync
 
+## Claude artifacts (customer UI)
+
+- `artifacts.list` / `artifacts.get` — recipes under `artifacts/`
+- Flagship: `integration-health-board` — private board on the customer's Claude
+  connection. **Read from the artifact; writes only via approved plays in chat.**
+
 ## Pattern
 
 ```
-agents.list -> plays.list -> play.describe -> play.plan
-  -> human approval -> play.run -> audit.explain
+agents.list -> artifacts.list (optional UI) -> plays.list -> play.describe
+  -> play.plan -> human approval -> play.run -> audit.explain
 ```
 
 ## Rules
