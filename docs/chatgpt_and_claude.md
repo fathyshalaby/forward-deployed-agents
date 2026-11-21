@@ -1,8 +1,7 @@
 # Connect FDA to ChatGPT and Claude
 
-This is the practical bridge from "we have an agent framework" to "people can
-use the agent from the AI they already have". The same runtime is exposed two
-ways:
+How **customers** talk to the forward-deployed agent you built with the
+meta-skill. Same runtime, two client paths:
 
 | Client | Transport | What you add |
 |---|---|---|

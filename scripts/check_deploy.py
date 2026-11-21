@@ -63,14 +63,21 @@ def main():
     for doc in ("docs/deployment.md", "docs/security.md", "docs/integrating.md",
                 "docs/chatgpt_and_claude.md",
                 "docs/builder_prompt.md", "docs/boilerplate.md", "docs/install.md",
-                "docs/README.md", "docs/tutorial.md", "docs/faq.md"):
+                "docs/tutorial.md", "docs/faq.md", "docs/artifacts.md"):
         text = read(doc)
         assert len(text) > 500, "%s looks empty" % doc
+    assert len(read("docs/README.md")) > 200, "docs/README.md looks empty"
+    assert (ROOT / "examples/bundles/specky-fde/fda-agent.json").is_file(), \
+        "flagship Specky example missing"
+    assert (ROOT / "examples/bundles/specky-fde/artifacts/"
+            "integration-health-board.md").is_file(), \
+        "Specky artifact recipe missing"
+    assert "artifacts.list" in read("src/fda/tools.py"), "MCP needs artifacts.list"
 
     workflow = read(".github/workflows/ci.yml")
     assert "make all" in workflow, "CI must run make all"
 
-    print("Deployment and integration artifacts checked: 22 files")
+    print("Deployment and integration artifacts checked")
     print("ALL CLEAN")
     return 0
 

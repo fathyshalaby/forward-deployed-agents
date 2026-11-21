@@ -1,16 +1,13 @@
 # Docs
 
-Start with [install.md](install.md) for the GitHub repo link and one-command
-install. [boilerplate.md](boilerplate.md) is the short contract used by the
-meta-skill; [builder_prompt.md](builder_prompt.md) is the copy/paste prompt.
+Start with the skill, not these pages.
 
-Everything below is reference material:
+1. [`builder_prompt.md`](builder_prompt.md) / `fda skill` — the front door
+2. [`install.md`](install.md) — install the skill from GitHub
+3. [`boilerplate.md`](boilerplate.md) — wire contract the skill follows
+4. [`chatgpt_and_claude.md`](chatgpt_and_claude.md) — how customers talk to the agent
+5. [`artifacts.md`](artifacts.md) — Claude artifact recipes as an FDE UI tool
+6. [`integrating.md`](integrating.md) — product-side handlers
+7. [`deployment.md`](deployment.md) / [`security.md`](security.md) — production
 
-- **Build & connect:** [tutorial.md](tutorial.md), [agent_bundles.md](agent_bundles.md),
-  [playbook_authoring.md](playbook_authoring.md), [chatgpt_and_claude.md](chatgpt_and_claude.md),
-  [connect_an_ai.md](connect_an_ai.md)
-- **Integrate a product:** [integrating.md](integrating.md), [architecture.md](architecture.md),
-  [deep_dive.md](deep_dive.md), [mcp_tools.md](mcp_tools.md)
-- **Operate:** [deployment.md](deployment.md), [security.md](security.md),
-  [privacy_model.md](privacy_model.md), [rollout.md](rollout.md), [faq.md](faq.md)
-- **Background:** [from_enron_case.md](from_enron_case.md)
+Optional: [`tutorial.md`](tutorial.md), [`faq.md`](faq.md).

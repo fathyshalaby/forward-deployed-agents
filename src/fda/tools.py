@@ -1,12 +1,15 @@
 """Generic MCP tools exposed by the framework."""
 from typing import List
 
-from .bundle import BundleError, bundle_skill_text, default_store, load_bundle_dir
+from .bundle import (
+    BundleError, bundle_skill_text, default_store, list_artifact_recipes,
+    load_bundle_dir, read_artifact_recipe,
+)
 from .connectors import ConnectorError
 from .plays import PlayError
 from .privacy import PrivacyError
 
-TOOL_VERSION = "0.5.0"
+TOOL_VERSION = "0.6.0"
 
 
 class ToolError(Exception):
@@ -123,6 +126,23 @@ def agent_skill(runtime, args):
     }
 
 
+def artifacts_list(runtime, args):
+    agent_id = args.get("agent_id")
+    items = []
+    for row in runtime.bundles:
+        if agent_id and row["id"] != agent_id:
+            continue
+        bundle = load_bundle_dir(row["source"])
+        items.extend(list_artifact_recipes(bundle))
+    return {"artifacts": items, "count": len(items)}
+
+
+def artifacts_get(runtime, args):
+    row = _installed(runtime, args["agent_id"])
+    bundle = load_bundle_dir(row["source"])
+    return read_artifact_recipe(bundle, args["artifact_id"])
+
+
 TOOLS: List[dict] = [
     {
         "name": "connectors.list",
@@ -237,6 +257,23 @@ TOOLS: List[dict] = [
         }, ["agent_id"]),
         "handler": agent_skill,
     },
+    {
+        "name": "artifacts.list",
+        "description": "List Claude artifact recipes shipped with installed agents. Recipes are prompts for interactive UIs that call FDA read tools over MCP.",
+        "inputSchema": _obj({
+            "agent_id": _str("Optional agent bundle id to filter"),
+        }),
+        "handler": artifacts_list,
+    },
+    {
+        "name": "artifacts.get",
+        "description": "Fetch one Claude artifact recipe. Build it as a Claude artifact connected to this MCP server; use only read tools from the artifact — writes stay in chat with human approval.",
+        "inputSchema": _obj({
+            "agent_id": _str("Agent bundle id"),
+            "artifact_id": _str("Artifact recipe id (filename stem under artifacts/)"),
+        }, ["agent_id", "artifact_id"]),
+        "handler": artifacts_get,
+    },
 ]
 
 
@@ -244,6 +281,7 @@ READ_ONLY_TOOLS = {
     "connectors.list", "plays.list", "play.describe", "play.status",
     "play.privacy_check", "approval.status", "ops.status", "audit.explain",
     "agents.list", "agent.describe", "agent.skill",
+    "artifacts.list", "artifacts.get",
 }
 
 DESTRUCTIVE_TOOLS = {"play.run", "approval.grant"}

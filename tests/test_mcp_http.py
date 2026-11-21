@@ -65,8 +65,9 @@ class MCPHTTPTests(unittest.TestCase):
     def test_tools_list_has_safety_annotations(self):
         _, text, _ = self.rpc({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
         tools = {row["name"]: row for row in json.loads(text)["result"]["tools"]}
-        self.assertEqual(len(tools), 15)
+        self.assertEqual(len(tools), 17)
         self.assertTrue(tools["plays.list"]["annotations"]["readOnlyHint"])
+        self.assertTrue(tools["artifacts.list"]["annotations"]["readOnlyHint"])
         self.assertTrue(tools["play.run"]["annotations"]["destructiveHint"])
         self.assertFalse(tools["play.run"]["annotations"]["readOnlyHint"])
 

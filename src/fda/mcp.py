@@ -42,7 +42,9 @@ class MCPServer:
                         "Use agents.list to see installed agents, then plays.list "
                         "and play.describe before acting. Prefer play.plan, then "
                         "human approval (out-of-band in external mode), then "
-                        "play.run. Audit every run."
+                        "play.run. Audit every run. For customer UIs, use "
+                        "artifacts.list / artifacts.get and build a Claude "
+                        "artifact that only calls read tools; keep writes in chat."
                     ),
                 }
             elif method == "ping":

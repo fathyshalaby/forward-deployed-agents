@@ -40,8 +40,8 @@ agents:
 
 agents-list: agents
 
-BUNDLE ?= examples/bundles/release-watch
-ARCHIVE ?= examples/bundles/dist/demo.release-watch-1.0.0.fda
+BUNDLE ?= examples/bundles/specky-fde
+ARCHIVE ?= examples/bundles/dist/specky.customer-fde-0.1.0.fda
 KEY ?= $(HOME)/.fda/keys/default.key
 TRUST ?= $(HOME)/.fda/trust.json
 REGISTRY ?= $(HOME)/.fda/registry

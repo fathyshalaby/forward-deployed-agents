@@ -495,6 +495,66 @@ def _skill_name(identifier: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", identifier.lower()).strip("-")
 
 
+def list_artifact_recipes(bundle: Bundle) -> List[dict]:
+    """List Claude artifact recipes shipped with a bundle (``artifacts/*.md``).
+
+    Recipes are prompts the customer pastes into Claude (or that Claude builds
+    from via MCP). They are read-only UI specs: artifacts may call FDA read
+    tools; writes stay in chat with human approval. No executable code.
+    """
+    root = bundle.root / "artifacts"
+    if not root.is_dir():
+        return []
+    items = []
+    for path in sorted(root.glob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        title = path.stem.replace("-", " ").replace("_", " ").title()
+        for line in text.splitlines():
+            if line.startswith("# "):
+                title = line[2:].strip()
+                break
+        items.append({
+            "id": path.stem,
+            "title": title,
+            "agent_id": bundle.manifest.id,
+            "path": "artifacts/%s" % path.name,
+            "bytes": path.stat().st_size,
+        })
+    return items
+
+
+def read_artifact_recipe(bundle: Bundle, artifact_id: str) -> dict:
+    """Return one artifact recipe markdown for Claude to build or refresh."""
+    safe = Path(artifact_id).name
+    if safe != artifact_id or ".." in artifact_id or "/" in artifact_id:
+        raise BundleError("invalid artifact id")
+    path = bundle.root / "artifacts" / ("%s.md" % safe)
+    if not path.is_file():
+        # allow id with or without .md
+        if artifact_id.endswith(".md"):
+            path = bundle.root / "artifacts" / safe
+        if not path.is_file():
+            raise BundleError("unknown artifact: %s" % artifact_id)
+    text = path.read_text(encoding="utf-8")
+    title = path.stem.replace("-", " ").replace("_", " ").title()
+    for line in text.splitlines():
+        if line.startswith("# "):
+            title = line[2:].strip()
+            break
+    return {
+        "id": path.stem,
+        "title": title,
+        "agent_id": bundle.manifest.id,
+        "path": "artifacts/%s" % path.name,
+        "recipe": text,
+        "note": (
+            "Build this as a Claude artifact connected to the FDA MCP server. "
+            "Use only read tools from the artifact; writes need play.plan + "
+            "human approval in chat."
+        ),
+    }
+
+
 def bundle_skill_text(bundle: Bundle, prefer_custom: bool = True) -> str:
     """Return an AI-client skill markdown document for an installed bundle."""
     if prefer_custom and bundle.manifest.skill:

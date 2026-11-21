@@ -1,0 +1,35 @@
+[
+  {
+    "id": "workspace",
+    "name": "Specky workspace",
+    "scopes": ["read"],
+    "actions": ["workspace.status", "workspace.checklist"],
+    "approval_required": [],
+    "description": "Aggregate workspace health and onboarding checklist. No customer content."
+  },
+  {
+    "id": "integrations",
+    "name": "Specky integrations",
+    "scopes": ["read", "write"],
+    "actions": [
+      "integrations.list",
+      "integrations.status",
+      "integrations.diagnose",
+      "integrations.reconnect",
+      "integrations.trigger_sync"
+    ],
+    "approval_required": [
+      "integrations.reconnect",
+      "integrations.trigger_sync"
+    ],
+    "description": "List and diagnose connected systems; reconnect or re-sync only after human approval."
+  },
+  {
+    "id": "support",
+    "name": "Support handoff",
+    "scopes": ["read", "write"],
+    "actions": ["support.open_ticket"],
+    "approval_required": ["support.open_ticket"],
+    "description": "Open a metadata-only handoff ticket when the agent cannot fix the issue."
+  }
+]

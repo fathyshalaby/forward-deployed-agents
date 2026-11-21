@@ -1,0 +1,27 @@
+{
+  "schema": "fda-agent/v1",
+  "id": "specky.customer-fde",
+  "name": "Specky Customer FDE",
+  "version": "0.1.0",
+  "description": "Forward-deployed engineer for Specky: onboard a workspace and diagnose or fix integration issues. Customers talk to it through Claude or ChatGPT.",
+  "author": "Forward Deployed Agents examples",
+  "license": "MIT",
+  "tags": ["example", "onboarding", "integrations", "specky"],
+  "homepage": "https://github.com/fathyshalaby/forward-deployed-agents",
+  "entry": {
+    "playbooks": "playbooks",
+    "connectors": "connectors.json",
+    "skill": "skill/SKILL.md"
+  },
+  "requires": {
+    "fda": ">=0.3"
+  },
+  "capabilities": [
+    "workspace.status",
+    "integrations.list",
+    "integrations.diagnose",
+    "integrations.reconnect",
+    "integrations.trigger_sync",
+    "support.open_ticket"
+  ]
+}

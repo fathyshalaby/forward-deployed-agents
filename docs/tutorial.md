@@ -36,13 +36,13 @@ and kill-switch state. Nothing is written to your product yet.
 Before authoring anything, prove the loop works:
 
 ```sh
-fda agents install examples/bundles/dist/demo.release-watch-1.0.0.fda
+fda agents install examples/bundles/dist/specky.customer-fde-0.1.0.fda
 fda agents list
 printf '{"jsonrpc":"2.0","id":1,"method":"tools/list"}\n' | fda serve --no-examples
 ```
 
-The last command prints 15 tools. Try `agents.list` and
-`play.describe` with `{"play_id":"demo.release-watch::release_watch"}` through
+The last command prints 17 tools. Try `agents.list`, `artifacts.list` and
+`play.describe` with `{"play_id":"specky.customer-fde::onboard"}` through
 your AI client (step 7) before writing your own bundle.
 
 ## 3. Author your own bundle
@@ -317,8 +317,8 @@ in `integrations/fda-skill.zip`.
 
 ## Next
 
-- [Architecture](architecture.md) — why the layers are separated
+- [Builder prompt](builder_prompt.md) — the skill that builds your agent
 - [Security](security.md) — trust model and honest limits
 - [Integration](integrating.md) — SDK, HTTP API, events, tenancy
-- [ChatGPT and Claude](chatgpt_and_claude.md) — client-specific setup
+- [ChatGPT and Claude](chatgpt_and_claude.md) — how customers talk to it
 - [Deployment](deployment.md) — production runbook

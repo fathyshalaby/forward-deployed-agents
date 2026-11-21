@@ -1,0 +1,49 @@
+{
+  "id": "integration_fix",
+  "name": "Diagnose and fix an integration",
+  "description": "Read integration status, diagnose the failure, then reconnect or re-sync after human approval.",
+  "purpose": "fix a broken customer integration",
+  "tags": ["integrations", "support", "specky"],
+  "steps": [
+    {
+      "id": "status",
+      "title": "Read integration status",
+      "tool": "connectors.call",
+      "connector": "integrations",
+      "action": "integrations.status",
+      "scopes": ["read"],
+      "needs": ["aggregate"]
+    },
+    {
+      "id": "diagnose",
+      "title": "Diagnose the failure",
+      "tool": "connectors.call",
+      "connector": "integrations",
+      "action": "integrations.diagnose",
+      "scopes": ["read"],
+      "needs": ["metadata"]
+    },
+    {
+      "id": "reconnect",
+      "title": "Reconnect the integration",
+      "tool": "connectors.call",
+      "connector": "integrations",
+      "action": "integrations.reconnect",
+      "scopes": ["read", "write"],
+      "needs": ["metadata"],
+      "write": true,
+      "purpose": "fix a broken customer integration"
+    },
+    {
+      "id": "resync",
+      "title": "Trigger a fresh sync",
+      "tool": "connectors.call",
+      "connector": "integrations",
+      "action": "integrations.trigger_sync",
+      "scopes": ["read", "write"],
+      "needs": ["metadata"],
+      "write": true,
+      "purpose": "fix a broken customer integration"
+    }
+  ]
+}
