@@ -49,25 +49,29 @@ class BuilderSkillTests(unittest.TestCase):
             (ROOT / "plugins/fda-claude/.claude-plugin/plugin.json").read_text())
         self.assertIn("coding agent", manifest["description"])
 
-    def test_meta_skill_is_language_agnostic(self):
-        for phrase in ("any language", "FDA_HANDLERS", "webhook", "X-FDA-Signature",
-                       "claude code", "codex", "fda api serve", "docs/boilerplate.md"):
-            self.assertIn(phrase, BUILDER_SKILL.lower()
-                          if phrase.islower() else BUILDER_SKILL)
+    def test_meta_skill_embeds_into_product_mcp(self):
+        lowered = BUILDER_SKILL.lower()
+        for phrase in ("your mcp", "existing mcp", "embed", "scaffold",
+                       "claude code", "codex", "docs/embed_mcp.md",
+                       "examples/embed/typescript"):
+            self.assertIn(phrase, lowered)
+        self.assertIn("Shall I build it?", BUILDER_SKILL)
 
     def test_boilerplate_contract_is_present(self):
         text = (ROOT / "docs/boilerplate.md").read_text()
         for phrase in ("FDA_HANDLERS", "X-FDA-Tenant", "POST /v1/plans",
-                       "POST /v1/runs", "X-FDA-Signature", "Definition of done"):
+                       "POST /v1/runs", "X-FDA-Signature", "Definition of done",
+                       "embed_mcp.md"):
             self.assertIn(phrase, text)
 
     def test_readme_leads_with_the_meta_skill(self):
         text = (ROOT / "README.md").read_text()
         lowered = text.lower()
         self.assertLess(lowered.index("start here: run the skill"),
-                        lowered.index("production sketch"))
+                        lowered.index("optional: reference python"))
         self.assertIn("fda skill", text)
-        self.assertIn("specky-fde", text)
+        self.assertIn("embed_mcp.md", text)
+        self.assertIn("examples/embed/typescript", text)
 
 
 if __name__ == "__main__":

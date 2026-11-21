@@ -1,0 +1,47 @@
+{
+  "id": "onboard",
+  "name": "Onboard a Specky workspace",
+  "description": "Check workspace health, list integration gaps, and open a handoff ticket if the customer is blocked.",
+  "purpose": "onboard a customer workspace",
+  "tags": ["onboarding", "specky"],
+  "steps": [
+    {
+      "id": "status",
+      "title": "Read workspace health",
+      "tool": "connectors.call",
+      "connector": "workspace",
+      "action": "workspace.status",
+      "scopes": ["read"],
+      "needs": ["aggregate"]
+    },
+    {
+      "id": "checklist",
+      "title": "Read onboarding checklist",
+      "tool": "connectors.call",
+      "connector": "workspace",
+      "action": "workspace.checklist",
+      "scopes": ["read"],
+      "needs": ["metadata"]
+    },
+    {
+      "id": "gaps",
+      "title": "List integrations and gaps",
+      "tool": "connectors.call",
+      "connector": "integrations",
+      "action": "integrations.list",
+      "scopes": ["read"],
+      "needs": ["metadata"]
+    },
+    {
+      "id": "handoff",
+      "title": "Open a handoff ticket if blocked",
+      "tool": "connectors.call",
+      "connector": "support",
+      "action": "support.open_ticket",
+      "scopes": ["read", "write"],
+      "needs": ["metadata"],
+      "write": true,
+      "purpose": "onboard a customer workspace"
+    }
+  ]
+}
