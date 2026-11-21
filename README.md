@@ -16,8 +16,9 @@ playbooks (JSON)  ->  plan  ->  human approval  ->  run  ->  audit.explain
 ## Quick start
 
 ```sh
-make test          # 31 unittest tests
+make test          # 32 unittest tests
 make demo          # scripted end-to-end session
+make scenarios     # 10 scenario matrix across the different agent types
 make serve         # MCP stdio server: python3 -m fda
 ```
 
@@ -37,8 +38,11 @@ In an MCP client, point the server at `python3 -m fda` from this directory.
   access review and a content step that demonstrates denial.
 - **Agent skill** (`skill/SKILL.md`): operating rules and a template for new
   playbooks.
-- **Docs** (`docs/`): architecture, authoring, privacy, tool reference, rollout
-  and the lessons carried from the Enron case.
+- **Scenario matrix** (`scripts/scenarios.py`): 10 runs covering approval,
+  no-approval, missing scope, wrong-purpose and replayed approvals.
+- **Docs** (`docs/`): architecture, authoring, privacy, tool reference, rollout,
+  a [deep dive](docs/deep_dive.md) on what the prototype proves and how to build
+  it for real, and the lessons carried from the Enron case.
 
 ## Your own agent
 

@@ -1,7 +1,7 @@
 PYTHON ?= python3
-export PYTHONPATH := src
+export PYTHONPATH := src:.
 
-.PHONY: test demo serve check all clean
+.PHONY: test demo serve check scenarios all clean
 
 test:
 	$(PYTHON) -m unittest discover -s tests -t . -v
@@ -15,4 +15,7 @@ serve:
 check:
 	$(PYTHON) scripts/check.py
 
-all: test demo check
+scenarios:
+	$(PYTHON) scripts/scenarios.py
+
+all: test demo scenarios check
