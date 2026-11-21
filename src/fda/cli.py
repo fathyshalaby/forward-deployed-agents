@@ -17,6 +17,7 @@ from .bundle import (
 from .http_api import serve as serve_api
 from .mcp import stdio_loop
 from .mcp_http import serve as serve_mcp_http
+from .onboarding_skill import ONBOARDING_SKILL
 from .runtime import (
     default_approval_mode, default_audit_path, default_state_path, examples_present,
     load_agents_runtime, load_runtime,
@@ -439,6 +440,11 @@ def cmd_ops_audit_verify(args) -> int:
     return 0 if result["ok"] else 1
 
 
+def cmd_skill_onboarding(args) -> int:
+    print(ONBOARDING_SKILL, end="")
+    return 0
+
+
 def cmd_api_serve(args) -> int:
     config = Config(
         state_path=args.state,
@@ -654,6 +660,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     verify = with_state(ops_sub.add_parser("audit-verify", help="verify audit hash chain"))
     verify.set_defaults(func=cmd_ops_audit_verify)
+
+    skill = sub.add_parser("skill", help="print an installable Agent Skill")
+    skill_sub = skill.add_subparsers(dest="skill_command", required=True)
+    onboarding = skill_sub.add_parser(
+        "onboarding", help="prompt for an agentic forward-deployed engineer")
+    onboarding.set_defaults(func=cmd_skill_onboarding)
 
     api = sub.add_parser("api", help="embed the agent runtime over JSON HTTP")
     api_sub = api.add_subparsers(dest="api_command", required=True)

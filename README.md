@@ -75,7 +75,7 @@ fda serve --transport http --host 0.0.0.0 --port 8000 \
 ## Quick start (the framework)
 
 ```sh
-make test          # 72 unittest tests
+make test          # 77 unittest tests
 make demo          # scripted end-to-end session
 make scenarios     # 10 scenario matrix across the different agent types
 make check         # docs links and content-free audit
@@ -108,6 +108,23 @@ make integration-example                            # runnable product example
 See [docs/integrating.md](docs/integrating.md) for the SDK, HTTP endpoints,
 events/webhooks, custom connectors and multi-tenancy. A runnable example is in
 [examples/integrations/product_app.py](examples/integrations/product_app.py).
+
+## Agentic onboarding engineer
+
+Product teams do not have to learn the framework: give their AI the
+**onboarding engineer skill** and it interviews them, designs the agent,
+scaffolds the signed bundle, binds real connectors, sets up approvals and
+deployment, connects ChatGPT/Claude and verifies the run.
+
+```sh
+fda skill onboarding                 # print the copy-paste prompt
+```
+
+The same text is an installable skill at
+[`skills/fda-onboarding-engineer/SKILL.md`](skills/fda-onboarding-engineer/SKILL.md),
+is bundled in [`integrations/fda-skill.zip`](integrations/fda-skill.zip) for
+Claude, and is documented with a copy/paste block in
+[docs/onboarding_prompt.md](docs/onboarding_prompt.md).
 
 ## What is included
 

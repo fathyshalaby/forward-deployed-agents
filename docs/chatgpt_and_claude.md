@@ -89,10 +89,14 @@ cp integrations/claude_desktop_config.example.json \
 Quit and reopen Claude Desktop. Test with "call fda `agents.list`". Logs are in
 `~/Library/Logs/Claude` if the server does not appear.
 
-Upload the skill once: **Customize → Skills → `+` → Create skill → Upload a
+Upload the skills once: **Customize → Skills → `+` → Create skill → Upload a
 skill** and select [`integrations/fda-skill.zip`](../integrations/fda-skill.zip).
-Toggle it on. It tells Claude not to self-grant approvals and to plan before
-running.
+It contains two skills: `fda-forward-deployed-agents` (how to operate an agent)
+and `fda-onboarding-engineer` (how to build and deploy one for a product).
+Toggle both on. The first tells Claude not to self-grant approvals and to plan
+before running; the second turns Claude into a forward-deployed engineer that
+onboards a product end to end. You can also paste the prompt from
+[onboarding_prompt.md](onboarding_prompt.md) into any chat with shell access.
 
 ## 3. Claude Code / Cowork
 

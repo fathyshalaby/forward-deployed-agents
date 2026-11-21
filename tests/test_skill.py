@@ -22,8 +22,8 @@ class SkillAndDocsTests(unittest.TestCase):
     def test_docs_exist(self):
         for name in ("architecture", "playbook_authoring", "privacy_model",
                      "mcp_tools", "rollout", "from_enron_case", "agent_bundles",
-                     "connect_an_ai", "chatgpt_and_claude", "deployment",
-                     "security", "integrating"):
+                     "connect_an_ai", "chatgpt_and_claude", "onboarding_prompt",
+                     "deployment", "security", "integrating"):
             self.assertTrue((REPO_ROOT / "docs" / ("%s.md" % name)).exists())
 
     def test_no_credential_fields_in_connector_descriptors(self):

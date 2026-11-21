@@ -45,17 +45,20 @@ def main():
     assert "mcpServers" in plugin, "Claude plugin needs an MCP config"
     skill = read("plugins/fda-claude/skills/fda-forward-deployed-agents/SKILL.md")
     assert "approval" in skill.lower(), "Claude skill must cover approvals"
+    onboarding = read("skills/fda-onboarding-engineer/SKILL.md")
+    assert "Handoff record" in onboarding, "onboarding skill needs a handoff"
+    assert "fda-onboarding-engineer" in read("src/fda/onboarding_skill.py")
     assert (ROOT / "integrations" / "fda-skill.zip").is_file(), "skill upload missing"
 
     for doc in ("docs/deployment.md", "docs/security.md", "docs/integrating.md",
-                "docs/chatgpt_and_claude.md"):
+                "docs/chatgpt_and_claude.md", "docs/onboarding_prompt.md"):
         text = read(doc)
         assert len(text) > 500, "%s looks empty" % doc
 
     workflow = read(".github/workflows/ci.yml")
     assert "make all" in workflow, "CI must run make all"
 
-    print("Deployment and integration artifacts checked: 13 files")
+    print("Deployment and integration artifacts checked: 16 files")
     print("ALL CLEAN")
     return 0
 
