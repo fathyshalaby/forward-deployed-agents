@@ -33,6 +33,11 @@ python3 -m fda agents skill acme.my-agent --target opencode
 python3 -m fda serve
 ```
 
+**New here? Start with the [tutorial](docs/tutorial.md)** — a 45-minute,
+copy-paste walkthrough from install to a signed, approved agent in ChatGPT and
+Claude. Run `fda tutorial` or `make tutorial` to print it from the CLI.
+Common questions are answered in the [FAQ](docs/faq.md).
+
 See [docs/agent_bundles.md](docs/agent_bundles.md) to author a bundle,
 [docs/connect_an_ai.md](docs/connect_an_ai.md) for generic MCP clients, and
 [docs/chatgpt_and_claude.md](docs/chatgpt_and_claude.md) to use agents from
@@ -75,7 +80,8 @@ fda serve --transport http --host 0.0.0.0 --port 8000 \
 ## Quick start (the framework)
 
 ```sh
-make test          # 77 unittest tests
+make test          # 81 unittest tests
+make tutorial      # print the end-to-end tutorial
 make demo          # scripted end-to-end session
 make scenarios     # 10 scenario matrix across the different agent types
 make check         # docs links and content-free audit

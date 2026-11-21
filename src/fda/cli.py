@@ -28,6 +28,7 @@ from .security import (
 )
 from .sdk import Client, Config
 from .store import StateStore
+from .tutorial import TUTORIAL
 
 SCAFFOLD_MANIFEST = {
     "schema": "fda-agent/v1",
@@ -445,6 +446,11 @@ def cmd_skill_onboarding(args) -> int:
     return 0
 
 
+def cmd_tutorial(args) -> int:
+    print(TUTORIAL, end="")
+    return 0
+
+
 def cmd_api_serve(args) -> int:
     config = Config(
         state_path=args.state,
@@ -666,6 +672,9 @@ def build_parser() -> argparse.ArgumentParser:
     onboarding = skill_sub.add_parser(
         "onboarding", help="prompt for an agentic forward-deployed engineer")
     onboarding.set_defaults(func=cmd_skill_onboarding)
+
+    tutorial = sub.add_parser("tutorial", help="print the end-to-end tutorial")
+    tutorial.set_defaults(func=cmd_tutorial)
 
     api = sub.add_parser("api", help="embed the agent runtime over JSON HTTP")
     api_sub = api.add_subparsers(dest="api_command", required=True)
