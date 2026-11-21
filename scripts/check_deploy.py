@@ -61,7 +61,7 @@ def main():
     assert "fda-agent-builder" in installer, "installer must install the meta-skill"
 
     for doc in ("docs/deployment.md", "docs/security.md", "docs/integrating.md",
-                "docs/chatgpt_and_claude.md", "docs/onboarding_prompt.md",
+                "docs/chatgpt_and_claude.md",
                 "docs/builder_prompt.md", "docs/boilerplate.md", "docs/install.md",
                 "docs/README.md", "docs/tutorial.md", "docs/faq.md"):
         text = read(doc)

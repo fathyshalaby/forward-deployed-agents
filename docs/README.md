@@ -13,5 +13,4 @@ Everything below is reference material:
   [deep_dive.md](deep_dive.md), [mcp_tools.md](mcp_tools.md)
 - **Operate:** [deployment.md](deployment.md), [security.md](security.md),
   [privacy_model.md](privacy_model.md), [rollout.md](rollout.md), [faq.md](faq.md)
-- **Background:** [from_enron_case.md](from_enron_case.md),
-  [onboarding_prompt.md](onboarding_prompt.md) (legacy longer prompt)
+- **Background:** [from_enron_case.md](from_enron_case.md)

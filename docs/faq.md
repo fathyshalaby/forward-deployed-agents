@@ -65,10 +65,9 @@ callable with `client.register_handler(action, fn)` or
 
 ## How do I onboard a new product quickly?
 
-Run `fda skill onboarding` and paste the output into your AI with a product
-description. It interviews the product owner, designs and scaffolds the bundle,
-wires handlers, signs, deploys, connects ChatGPT/Claude and verifies the run.
-The [tutorial](tutorial.md) walks through the same steps manually.
+Run `fda skill` and paste the output into your AI with a product description.
+It asks three questions, builds and wires the agent, deploys it and verifies the
+run. The [tutorial](tutorial.md) walks through the same steps manually.
 
 ## What is still a prototype?
 

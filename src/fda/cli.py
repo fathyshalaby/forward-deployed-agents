@@ -18,7 +18,6 @@ from .builder_skill import BUILDER_SKILL
 from .http_api import serve as serve_api
 from .mcp import stdio_loop
 from .mcp_http import serve as serve_mcp_http
-from .onboarding_skill import ONBOARDING_SKILL
 from .runtime import (
     default_approval_mode, default_audit_path, default_state_path, examples_present,
     load_agents_runtime, load_runtime,
@@ -447,11 +446,6 @@ def cmd_meta_skill(args) -> int:
     return 0
 
 
-def cmd_skill_onboarding(args) -> int:
-    print(ONBOARDING_SKILL, end="")
-    return 0
-
-
 def cmd_tutorial(args) -> int:
     print(TUTORIAL, end="")
     return 0
@@ -678,9 +672,6 @@ def build_parser() -> argparse.ArgumentParser:
     skill_sub = skill.add_subparsers(dest="skill_command")
     builder = skill_sub.add_parser("builder", help="print the agent-builder meta-skill")
     builder.set_defaults(func=cmd_meta_skill)
-    onboarding = skill_sub.add_parser(
-        "onboarding", help="legacy longer onboarding prompt")
-    onboarding.set_defaults(func=cmd_skill_onboarding)
 
     sub.add_parser("meta", help="alias for `fda skill`").set_defaults(
         func=cmd_meta_skill)

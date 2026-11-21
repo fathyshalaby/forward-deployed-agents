@@ -34,7 +34,7 @@ class TutorialTests(unittest.TestCase):
                         "fda registry publish", "fda agents install",
                         "fda approvals serve", "fda api serve",
                         "fda serve --transport http", "fda ops audit-verify",
-                        "fda ops pause", "fda skill onboarding"):
+                        "fda ops pause", "fda skill"):
             self.assertIn(command, TUTORIAL)
 
 

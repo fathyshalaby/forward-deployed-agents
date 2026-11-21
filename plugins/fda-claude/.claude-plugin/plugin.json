@@ -1,7 +1,7 @@
 {
   "name": "fda-forward-deployed-agents",
   "description": "One meta-skill that turns Claude Code, Codex or any coding agent into a forward-deployed engineer: it reads the FDA boilerplate and builds, wires and verifies an agent in the product's language.",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "author": {
     "name": "fathyshalaby"
   },

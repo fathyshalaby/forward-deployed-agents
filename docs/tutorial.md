@@ -24,7 +24,7 @@ planning, approvals, audit and the kill switch.
 
 ```sh
 python3 -m pip install .
-fda --version          # 0.6.1
+fda --version          # 0.6.2
 fda doctor
 ```
 
@@ -301,8 +301,7 @@ Paste it with a product description. It reads `docs/boilerplate.md`, asks three
 questions, scaffolds the bundle, writes language-agnostic webhook handlers,
 signs and pins it, deploys, connects the AI clients and verifies the run. The
 same text is installable from `skills/fda-agent-builder/SKILL.md` and is bundled
-in `integrations/fda-skill.zip`. The older `fda skill onboarding` prompt remains
-available for the longer interview format.
+in `integrations/fda-skill.zip`.
 
 ## Troubleshooting
 
