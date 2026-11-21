@@ -81,9 +81,4 @@ docs/              architecture, authoring, privacy, tools, rollout
 tests/             standard-library unittest suite
 ```
 
-## Why this shape
 
-The Enron case next door proved the value of minimal data, explicit decisions
-and tested risk claims. This framework applies the same discipline to live
-customer work: the playbook is the decision, the gate is the test, and the
-audit is the evidence. See [docs/from_enron_case.md](docs/from_enron_case.md).
